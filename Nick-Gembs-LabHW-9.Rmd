@@ -1,0 +1,241 @@
+---
+title: "Lab-HW-9"
+author: "Nick Gembs"
+date: "4/9/2021"
+output: word_document
+---
+
+
+Problem #1: Use some transformations to build a regression model relating the amount of plutonium activity is several samples and a device that records alpha particle strikes. Readings were also taken when no plutonium samples were present.
+```{r}
+
+pluto <- read.csv("C:/Users/Nick/Downloads/Plutonium.csv")
+c <- plot(pluto[2:1])
+c
+pluto.fit <- lm(Alpha.Count ~ Pu.Act , data = pluto)
+
+#set up plotting region for the diagnostic plots
+
+par(mfrow=c(2,2))
+plot(pluto.fit)
+
+
+```
+
+```{r}
+#24th observation is an outlier and needs to be removed, refit the model
+
+
+pluto <- pluto[-24,]
+plot(pluto[2:1])
+
+pluto.fit<- lm(Alpha.Count ~ Pu.Act , data = pluto)
+plot(pluto.fit)
+```
+
+```{r}
+#qq plot looks better but still not great, try a transformation of the response with boxcox
+#fits the model Y^lambda = b_0 +b_1*X + epsilon
+
+library(MASS)
+boxcox(pluto.fit, lambda = seq(-2,2,1/10))
+boxcox(pluto.fit, lambda= seq(.25,.75,.05))
+
+#going to use sqrt, lambda = .5
+
+pluto$sqrt.alpha <- sqrt(pluto$Alpha.Count)
+pluto.fit.sqrt <- lm (sqrt.alpha ~ Pu.Act, data=pluto)
+plot(pluto[2:3])
+plot(pluto.fit.sqrt)
+
+```
+
+
+```{r}
+pluto$sqrt.Pu <- sqrt(pluto$Pu.Act)
+pluto.fit.both <- lm(sqrt.alpha ~ sqrt.Pu, data = pluto)
+plot(pluto[4:3])
+plot(pluto.fit.both)
+
+summary(pluto.fit.both)
+
+#Final Model: sqrt(alpha) = 0.073 + 0.057*sqrt(Pu)
+```
+
+\newpage
+
+Problem #2: The Loblolly data frame has 84 rows and 3 columns of records of the growth of Loblolly pine trees. We will only concern ourselves with age and height.
+```{r}
+
+#Fit the Loblolly data using these transformations (ln ,t^0.25, t^0.5 , t^1 , t^2) on the response variable. Which two even out the variances the best? (For each transformation, compute the ratio of the largest variance by age to the smallest variance by age. The best will be the tranformations with a ratio closest to one. )
+
+lob <- Loblolly
+
+
+ln <- log(lob$height)
+tquarter <- (lob$height)^.25
+thalf <- (lob$height)^.5
+tone <- (lob$height)
+ttwo <- (lob$height)^2
+
+
+
+lmln <- lm(ln ~ lob$age)
+a <- max(residuals(lmln))/-min(residuals(lmln))
+a
+
+lmquarter <- lm(tquarter ~ lob$age)
+b <- max(residuals(lmquarter))/-min(residuals(lmquarter))
+b
+
+lmhalf <- lm(thalf ~ lob$age)
+c <- max(residuals(lmhalf))/-min(residuals(lmhalf))
+c
+
+lmone <- lm(tone ~ lob$age)
+d <- max(residuals(lmone))/-min(residuals(lmone))
+d
+
+lmtwo <- lm(ttwo ~ lob$age)
+e <- max(residuals(lmtwo))/-min(residuals(lmtwo))
+e
+
+paste("t^.5 and t^1 even out the variances the best.")
+
+#Plot the two transformed sets from the previous part. For each transformation, do the variances at each age look similar? For each tranformation, does the relationship between age and the transformed variables look linear?
+par(mfrow = c(2,4))
+
+plot(lmone)
+plot(lmhalf)
+
+paste("The relationship between age and transformed variables do not look linear in either of the two tranformations chosen. The variances for t^1 appear greater than for t^.5, but both variances show a non-linear relationship")
+
+#Find a transformation for the predictor that has an approximate linear relationship with the transformed responses. (limit your search to the same transformations you tried on the response.)
+
+squared <- log(lob$age)
+
+lm.fit <- lm(tone ~ squared)
+
+
+f <- max(residuals(lm.fit))/-min(residuals(lm.fit))
+f
+
+
+squared <- log(lob$age)
+
+lm.fit2 <- lm(thalf ~ squared)
+
+
+
+g <- max(residuals(lm.fit2))/-min(residuals(lm.fit2))
+g
+par(mfrow = c(2,4))
+plot(lm.fit)
+plot(lm.fit2)
+
+#Do either of these pairings appear to meet the assumptions for a normal linear regression model? Explain.
+
+paste("It does not appear that either of the pairing in the previous part perfectly meet the assumptions for a normal linear regression model. Although the pairing of ln(age) and (height)^.5 appears linear, the variance is not perfectly consistant for all age values, specifically at 2 and 3.")
+	
+#Which model do you choose? Explain why.
+
+paste("I choose the model of an ln tranformation on age and a t^.5 transformation on height because its residual plot appears the most flat and its qqplot appears to be the most positive linear.")
+
+```
+
+\newpage
+
+Problem #3: A materials engineer at a furniture manufacturing site wants to assess the stiffness of the particle board that the manufacturer uses. The engineer collects stiffness data from particle board pieces that have various densities at different temperatures. (Minitab) Use the ParticleBoard dataset to answer the following questions. For these questions we will assume that all regression assumptions are met.
+
+```{r}
+
+
+Particle <- read.csv("C:/Users/Nick/Downloads/ParticleBoard (1).csv")
+
+
+#a.	Construct a scatterplot of Stiffness vs Density. Describe the relationship. Do they appear to have a linear or curved relationship?
+
+names(Particle)[1] <- "Density"
+
+plot(Particle$Stiffness, Particle$Density)
+
+paste("There appears to be a positive relationship between stiffness and density that likely is non-linear with a slight concave-down curve.")
+
+
+#b.	Fit Stiffness modeled on Density. Construct a residual plot. Does this indicate that there is a linear relationship between the variables?
+par(mfrow = c(2,2))
+lm.fit <- lm(Particle$Density~Particle$Stiffness)
+plot(lm.fit)
+
+paste("The residual plot for this relationship indicates a non-linear relationship between these variables")
+
+#c.	Construct the scale location plot. Does this indicate that the variances approximatley the same through out the range of predictors?
+
+paste("The scale location plot has a low positive slope which indicates that the variances are close through out the range of predictors but not the same. There appears to be a mild increase in variance as the predicators increase.")
+
+#d.	Construct a qqplot of the residuals. Do the residuals appear to be normally distributed?
+
+paste("Since the qqplot does not appear to be linear, the residuals are not normally distributed.")
+
+#e.	If you were going to perform a transformation on the Stiffness variable would you consider increasing or decreasing the power? What about the Density variable?
+
+paste("If I were to perform a tranformation on the stiffness variable, I would decrease the power. For the density variable, I would increase the power.")
+
+#f.	Transforming the response can have a large effect on the distribution of the residuals. Based on the graphs you have examined, which would be your first candidate for transformation? Response or predictor?
+
+paste("I would first do a transformation on the predictor as the graphs show that the distribution of the residuals/variances do not appear to be extremely skewed. If the transformation is not effective enough, I will try a transformation on the response.")
+
+#g.	By transforming at least one of these variables, it is possible to find two variables (after possible transformation) that approximately meet the assumptions for our normal regression model. What transformations are needed? ( Restrict your search to powers in seq(-10,10,.25) ) Demonstrate graphically that they work.
+
+particleneg <- Particle$Stiffness^-10
+particleten <- Particle$Stiffness^10
+particlequarter <- Particle$Stiffness^.25
+
+#lm.fit <- lm(Particle$Density~particleneg)
+#plot(lm.fit)
+#lm.fit <- lm(Particle$Density~particleten)
+#plot(lm.fit)
+lm.fit <- lm(Particle$Density~particlequarter)
+plot(lm.fit)
+
+densityneg <- Particle$Density^-10
+densityten <- Particle$Density^10
+densityquarter <- Particle$Density^.25
+
+#lm.fit <- lm(densityneg~Particle$Stiffness)
+#plot(lm.fit)
+lm.fit <- lm(densityten~Particle$Stiffness)
+plot(lm.fit)
+#lm.fit <- lm(densityquarter~Particle$Stiffness)
+#plot(lm.fit)
+
+#par(mfrow = c(1,1))
+
+#lm.fit <- lm(densityten~particlequarter)
+#plot(lm.fit)
+
+paste("I believe that a trnaformation of the Stiffness variable to the .25 power is the best transformation in the given sequence. There is still some variance on the residual plot but the variances are low, the qq plot is linear, and the scale-location plot shows little to no change in variance over the range of stiffness values")
+
+
+
+```
+
+\newpage
+
+Problem #4: A wine producer wants to know how the chemical composition of his wine relates to sensory evaluations. He has 37 Pinot Noir samples, each described by 17 elemental concentrations (Cd, Mo, Mn, Ni, Cu, Al, Ba, Cr, Sr, Pb, B, Mg, Si, Na, Ca, P, K) and a score on the wine’s aroma from a panel of judges. He wants to predict the aroma score from the 17 elements. Data are from: I.E. Frank and B.R. Kowalski (1984). “Prediction of Wine Quality and Geographic Origin from Chemical Measurements by Partial Least-Squares Regression Modeling,” Analytica Chimica Acta, 162, 241 − 251. (Minitab)
+```{r}
+
+Wine <- read.csv("C:/Users/Nick/Downloads/Wine (1).csv")
+names(Wine)[1] <- "Cd"
+
+#a.	When examined up close, does the relationship between Sr and Aroma appear to meet the assumptions for our normal regression model? Explain. If not, can you find a transformation or set of transformations that improves the fit. Justify your statement. If you think that no transformations, are needed, that needs to be justified.
+
+
+lm.fit <- lm(Wine$Aroma ~ Wine$Sr)
+plot(lm.fit)
+
+paste("I do believe that the relationship between Sr and Aroma fit the assumptions for our normal regression model. The residual plot displays fairly consistant residuals with low variance. The qqplot is clearly positive and linear. The scale location plot indicates almost no difference in variance along the range of Sr values. There appears to be a clear linear relationship between Sr and aroma with a consistant variance along the Sr variable.")
+```
+
+
+

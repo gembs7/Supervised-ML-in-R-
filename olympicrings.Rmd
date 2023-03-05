@@ -1,0 +1,102 @@
+---
+title: "Untitled"
+author: "Nick Gembs"
+date: "2/28/2023"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r}
+windows.options(width = 10, height = 10)
+pdf("olympicrings.pdf")
+
+plot(0,type = "n",xlim = c(-2.5*1.5,3*1.5), ylim = c(-2.5*1.5,2.5*1.5), axes = FALSE, ann = FALSE)
+
+
+circle_points <- function(n=1000){
+  theta <- 2*pi*seq(0,1,length.out = n+1)
+  x1 <- cos(theta)
+  x2 <- sin(theta)
+  return(list(x1=x1, x2=x2))
+}
+
+circ <- circle_points()
+x1<- circ$x1
+x2<-circ$x2
+polygon(x1-2.35,x2+1.15, border = "#0081C8", lwd = 11.8)
+polygon(x1-1.175,x2, border = "#FCB131", lwd = 11.8)
+polygon(x1,x2+1.15, border = "#000000", lwd = 11.8)
+polygon(x1+1.175,x2, border = "#00A651", lwd = 11.8)
+polygon(x1+2.35,x2+1.15, border = "#EE334E", lwd = 11.8)
+
+
+circle_points_top <- function(n=1000){
+  theta <- 2*pi*seq(0,1,length.out = n+1)[125:375]
+  x1 <- cos(theta)
+  x2 <- sin(theta)
+  return(list(x1=x1, x2=x2))
+}
+
+circle_points_left <- function(n=1000){
+  theta <- 2*pi*seq(0,1,length.out = n+1)[c(375:625)]
+  x1 <- cos(theta)
+  x2 <- sin(theta)
+  return(list(x1=x1, x2=x2))
+}
+
+circle_points_right <- function(n=1000){
+  theta <- 2*pi*seq(0,1,length.out = n+1)[c(875:1000,1:125)]
+  x1 <- cos(theta)
+  x2 <- sin(theta)
+  return(list(x1=x1, x2=x2))
+}
+
+
+circle_points_bottom <- function(n=1000){
+  theta <- 2*pi*seq(0,1,length.out = n+1)[c(625:875)]
+  x1 <- cos(theta)
+  x2 <- sin(theta)
+  return(list(x1=x1, x2=x2))
+}
+
+
+circ <- circle_points_top()
+x1<- circ$x1
+x2<-circ$x2
+
+lines(x1-1.175,x2, col = "#FCB131", lwd = 11.8)
+
+circ <- circle_points_right()
+x1<- circ$x1
+x2<-circ$x2
+
+lines(x1-2.35,x2+1.15, col = "#0081C8", lwd = 11.8)
+
+circ <- circle_points_bottom()
+x1<- circ$x1
+x2<-circ$x2
+
+lines(x1,x2+1.15, col = "#000000", lwd = 11.8)
+
+circ <- circle_points_left()
+x1<- circ$x1
+x2<-circ$x2
+
+lines(x1+1.175,x2, col = "#00A651", lwd = 11.8)
+
+circ <- circle_points_top()
+x1<- circ$x1
+x2<-circ$x2
+
+lines(x1+1.175,x2, col = "#00A651", lwd = 11.8)
+
+circ <- circle_points_right()
+x1<- circ$x1
+x2<-circ$x2
+
+lines(x1,x2+1.15, col = "#000000", lwd = 11.8)
+
+
+```
+

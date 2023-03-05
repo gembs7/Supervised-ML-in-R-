@@ -1,0 +1,55 @@
+---
+title: "ECON3140HW1"
+author: "Nick Gembs"
+date: "1/30/2022"
+output:
+  word_document: default
+  html_document: default
+  pdf_document: default
+---
+
+```{r}
+
+# 1.1 Visualize the data by means of a scatter plot.
+
+print('1.1')
+
+data = read.csv("C:/Users/Nick/Downloads/data (1).csv")
+
+names(data) = c("x","y")
+
+graph = plot(data)
+graph
+
+
+# 1.2 Compute (βˆ0, βˆ1), the estimated coefficients of a simple linear regression of y on x.
+
+print('1.2')
+
+lm.fit = lm(data)
+lm.fit
+
+# 1.3 Compute the residuals ˆui = yi − βˆ0 − βˆ1xi
+
+print('1.3')
+
+res = residuals(lm.fit)
+res
+
+#1.4 Regress ˆui on xi.
+
+print('1.4')
+
+
+
+resfit = lm(res~data$x)
+resfit
+
+plot(res~data$x)
+
+#plot(resfit)
+
+print("These residuals do not excatly fit with the assumption that the expected value of a residual conditional on the x value is 0. Currently, the residuals regressed on the x values has a partially positive slope. However, the full model may fit the correct residual assumption, removing error as the sample size increases.")
+```
+
+

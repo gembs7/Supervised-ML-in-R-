@@ -1,0 +1,190 @@
+---
+title: "STSCI 4520 Lab 4"
+author: "Nick Gembs"
+date: "2/14/2023"
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Lab 04 - printing output to console
+
+Our objective in this lab is to reproduce the output
+produced by printing the summary object of an lm object.
+
+```{r}
+dat = read.csv("C:/Users/Nick/Documents/GitHub/statcomp2023/datasets/voice_heights.csv")
+m1 <- lm( height ~ voice, data = dat )
+s1 <- summary(m1)
+```
+
+This will teach you more about the information stored in
+the lm object and in the summary object of the lm object,
+as well as about sprintf.
+
+## sprintf
+
+Read the documentation for sprintf and answer the following questions.
+
+1. The formatting syntax uses %, followed by optional specifications, and ending
+with a single character. How many different ending characters are supported? 
+
+
+```{r}
+nchar("aAdifeEgGosxX%")
+```
+
+14 endings are supported.
+
+2. Which format most closely resembles how R prints double precision values in the console?
+
+```{r}
+sprintf("Test %1.1f", 3.4)
+sprintf("Test %1.0f", 3)
+```
+
+
+%f most closely resembles R's double precision printing with setting (# of characters used).(# of digits after decimal)
+
+3. Create a character vector containing two spaces and then
+$\pi$ to 18 decimal places. Is it correct?
+
+```{r}
+sprintf("%22.18f", pi)
+```
+
+It is not correct, pi to 18 decimal places is 3.141592653589793238. The last 3
+decimal places are incorrect.
+
+
+4. Create a character vector containing the codes "001", "002", "003", ... , "099", "100"
+
+```{r}
+x <- 1:100
+
+sprintf("%03.0f", x)
+```
+
+
+## lm and summary.lm objects
+
+Both `m1` and `s1` (defined in code above) are "list-like" objects,
+meaning that they have several named fields that can be accessed in
+the same way any list's elements can be accessed. Familiarize yourself
+with the contents of `m1` and `s1` by printing each object's elements
+to the console (you don't need to include that output here).
+
+The lab exercise will go more smoothly if you spend some time here
+inspecting the contents of these objects.
+
+## Reproduce `print(s1)`
+```{r}
+{
+cat("Call:\n")
+cat(sprintf("%s", s1[1]), 
+    '\n\n')
+
+cat("Residuals:\n")
+cat("     Min      1Q  Median      3Q     Max \n")
+
+minres = min(s1$residuals)
+q1res = quantile(s1$residuals, .25)
+medres = median(s1$residuals)
+q3res = quantile(s1$residuals, .75)
+maxres = max(s1$residuals)
+
+for (i in c(minres,q1res,medres,q3res,maxres)){
+  cat(sprintf("%8.4f", i))
+}
+
+cat("\n\nCoefficients:\n             Estimate Std. Error t value Pr(>|t|) \n")
+
+
+coefficients = s1$coefficients
+lencol1 = max(nchar((variable.names(m1))))
+index = 1
+index1 = 1
+
+
+for (elem in variable.names(m1)){
+  
+  index = index1
+  
+  spaces = (lencol1) - nchar(elem) 
+  spaces = rep(" ", spaces)
+  cat(elem, spaces, sep = "")
+  
+  for (i in 1:4) {
+  
+    if (index > length(coefficients)*.75) {
+    
+      if (coefficients[index] <= 2* 10 ^ (-16)) {
+        cat("  < 2e-16")
+      } else if ( coefficients[index] < .001){
+        cat(sprintf("%9.2e", coefficients[index]))
+      } else {
+        cat(sprintf("%9.3f", coefficients[index]))
+      }
+      
+      if(coefficients[index] <= .001) {
+        cat(" ***")
+      } else if (coefficients[index] <= .01) {
+        cat(" **")
+      } else if (coefficients[index] <= .05) {
+        cat(" *")
+      } else if (coefficients[index] <= .1) {
+        cat(" .")
+      } 
+      
+      
+    } else if (index > length(coefficients)*.5) {
+      cat(sprintf("%8.3f", coefficients[index])) }
+    
+   else if (index > length(coefficients)*.25) {
+      cat(sprintf("%11.4f", coefficients[index])) }
+  
+    else {
+      cat(sprintf("%9.4f", coefficients[index])) 
+    }
+    
+    index = index + 4
+    
+  }
+  
+  
+  index1 = index1+1  
+  cat("\n")
+}
+
+cat("---\nSignif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1\n\n")
+
+cat("Residual standard error: ")
+cat(sprintf("%5.3f", s1$sigma), "on" , sprintf("%d", s1$df[2]),
+    "degrees of freedom\n")
+cat("Multiple R-squared: ")
+cat(sprintf("%7.4f,", s1$r.squared),"   Adjusted R-squared:",
+    sprintf("%7.4f", s1$adj.r.squared), "\n")
+cat("F-statistic: ")
+
+pval = pf(s1$fstatistic[1],s1$fstatistic[2],s1$fstatistic[3],lower.tail=FALSE)
+
+
+cat(sprintf("%4.1f", s1$fstatistic[1]), "on", sprintf("%d", s1$fstatistic[2]),
+    "and", sprintf("%d", s1$fstatistic[3]),
+    "DF,  p-value: ")
+    
+if (pval <= 2* 10 ^ (-16)) {
+  cat("< 2.2e-16") } else if (pval <= .001) { 
+    cat(sprintf("%9.2e", pval))
+  } else {
+      cat(sprintf("%9.3f", pval))
+    }
+
+}
+```
+

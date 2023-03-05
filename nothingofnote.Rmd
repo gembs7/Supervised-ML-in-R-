@@ -1,0 +1,140 @@
+---
+title: "Yuh"
+author: "Nick Gembs"
+date: "5/11/2021"
+output: html_document
+---
+```{r}
+HistObs <- read.csv("C:/Users/Nick/Downloads/48453-annual-hist_obs-tmin.csv")
+
+HistMod <- read.csv("C:/Users/Nick/Downloads/48453-annual-hist_mod-tmin.csv")
+
+ProjMod <- read.csv("C:/Users/Nick/Downloads/48453-annual-proj_mod-tmin.csv", header=T)
+
+```
+
+```{r}
+mean1 <- mean(HistObs$tmin)
+mean1
+mean2 <- mean(HistMod$weighted_mean)
+mean2
+
+mean3 <- mean(HistObs$tmin[33:64]) - mean(HistObs$tmin[1:33])
+mean3
+mean4 <- mean(HistMod$weighted_mean[33:57]) - mean(HistMod$weighted_mean[1:33])
+mean4
+
+mean5 <- mean(ProjMod$rcp45_weighted_mean[15:54]) - mean2
+mean5
+mean6 <- mean(ProjMod$rcp85_weighted.mean[15:54]) - mean2
+mean6
+mean7 <- mean(ProjMod$rcp45_weighted_mean[55:94]) - mean2
+mean7
+mean8 <- mean(ProjMod$rcp85_weighted.mean[55:94]) - mean2
+mean8
+
+
+mean9 <- (mean(ProjMod$rcp85_max[55:94]) - mean2)- (mean(ProjMod$rcp85_min[55:94]) - mean2)
+mean9
+
+mean10 <- (mean(ProjMod$rcp45_max[55:94]))- (mean(ProjMod$rcp45_min[55:94]))
+mean10
+
+mean9-mean10
+
+mean(ProjMod$rcp85_max)
+mean(ProjMod$rcp85_min)
+```
+
+```{r}
+HistObs <- read.csv("C:/Users/Nick/Downloads/48453-annual-hist_obs-days_tmax_gt_90f (1).csv")
+
+HistMod <- read.csv("C:/Users/Nick/Downloads/48453-annual-hist_mod-days_tmax_gt_90f.csv")
+
+ ProjMod <- read.csv("C:/Users/Nick/Downloads/48453-annual-proj_mod-days_tmax_gt_90f.csv")
+```
+
+```{r}
+mean1 <- mean(HistObs$days_tmax_gt_90f)
+mean1
+mean2 <- mean(HistMod$weighted_mean)
+mean2
+
+mean3 <- mean(HistObs$days_tmax_gt_90f[33:64]) - mean(HistObs$days_tmax_gt_90f[1:33])
+mean3
+mean4 <- mean(HistMod$weighted_mean[33:57]) - mean(HistMod$weighted_mean[1:33])
+mean4
+
+mean5 <- mean(ProjMod$rcp45_weighted_mean[15:54]) - mean2
+mean5
+mean6 <- mean(ProjMod$rcp85_weighted.mean[15:54]) - mean2
+mean6
+mean7 <- mean(ProjMod$rcp45_weighted_mean[55:94]) - mean2
+mean7
+mean8 <- mean(ProjMod$rcp85_weighted.mean[55:94]) - mean2
+mean8
+```
+
+
+
+```{r}
+HistObs <- read.csv("C:/Users/Nick/Downloads/48453-annual-hist_obs-pcpn.csv")
+HistMod <- read.csv("C:/Users/Nick/Downloads/48453-annual-hist_mod-pcpn.csv")
+ProjMod <- read.csv("C:/Users/Nick/Downloads/48453-annual-proj_mod-pcpn.csv")
+```
+
+
+```{r}
+mean1 <- mean(HistObs$pcpn)
+mean1
+mean2 <- mean(HistMod$weighted_mean)
+mean2
+
+mean3 <- mean(HistObs$pcpn[33:64]) - mean(HistObs$pcpn[1:33])
+mean3
+mean4 <- mean(HistMod$weighted_mean[33:57]) - mean(HistMod$weighted_mean[1:33])
+mean4
+
+mean5 <- mean(ProjMod$rcp45_weighted_mean[15:54]) - mean2
+mean5
+mean6 <- mean(ProjMod$rcp85_weighted.mean[15:54]) - mean2
+mean6
+mean7 <- mean(ProjMod$rcp45_weighted_mean[55:94]) - mean2
+mean7
+mean8 <- mean(ProjMod$rcp85_weighted.mean[55:94]) - mean2
+mean8
+
+mean9 <- mean(ProjMod$rcp85_max) - mean(ProjMod$rcp85_min)
+mean9
+```
+
+```{r}
+HistObs <- read.csv("C:/Users/Nick/Downloads/48453-annual-hist_obs-days_pcpn_gt_1in.csv")
+ HistMod <- read.csv("C:/Users/Nick/Downloads/48453-annual-hist_mod-days_pcpn_gt_1in.csv")
+ ProjMod <- read.csv("C:/Users/Nick/Downloads/48453-annual-proj_mod-days_pcpn_gt_1in.csv")
+```
+
+```{r}
+mean1 <- mean(HistObs$days_pcpn_gt_1in)
+mean1
+mean2 <- mean(HistMod$weighted_mean)
+mean2
+
+mean3 <- mean(HistObs$days_pcpn_gt_1in[33:64]) - mean(HistObs$days_pcpn_gt_1in[1:33])
+mean3
+mean4 <- mean(HistMod$weighted_mean[33:57]) - mean(HistMod$weighted_mean[1:33])
+mean4
+
+mean5 <- mean(ProjMod$rcp45_weighted_mean[15:54]) - mean2
+mean5
+mean6 <- mean(ProjMod$rcp85_weighted.mean[15:54]) - mean2
+mean6
+mean7 <- mean(ProjMod$rcp45_weighted_mean[55:94]) - mean2
+mean7
+mean8 <- mean(ProjMod$rcp85_weighted.mean[55:94]) - mean2
+mean8
+```
+```{r}
+pnorm(24,25,1, lower.tail=T)
+```
+

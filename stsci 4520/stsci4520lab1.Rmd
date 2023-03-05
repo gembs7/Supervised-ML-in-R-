@@ -1,0 +1,84 @@
+---
+title: "STSCI 4520 Lab 1"
+author: "Nick Gembs"
+date: "1/25/2023"
+output:
+  word_document: default
+  html_document: default
+---
+
+---
+title: "Introduction to R Markdown and factor variables"
+output: pdf_document
+---
+
+# Lab Exercise
+
+Complete the exercise below in a SEPARATE R Markdown file, and turn
+it in as a pdf on canvas. DO NOT include the introduction to
+Rmarkdown from the top of this script.
+
+Read in the "voice_heights" data found in the github repo in
+`datasets/voice_heights.csv`. The data contain the heights and voice
+categories for all people in a choir. Fit a linear model to the
+heights, using voice as a factor
+
+```{r}
+dat <- read.csv("C:/Users/Nick/Documents/GitHub/statcomp2023/datasets/voice_heights.csv")
+head(dat)
+
+h <- dat$height
+v <- as.factor(dat$voice)
+levels(v)
+m1 <- lm( h ~ v )
+summary(m1)
+```
+
+Note that the regression output compares the height of each voice with
+the reference level.
+
+Re-run the regression 3 more times, each time changing the reference level.
+Use the results to report the t-statistic for comparing the means of
+every pair of heights.
+
+```{r}
+v <- as.factor(dat$voice)
+v <- relevel(v, ref = "bass")
+m1 <- lm( h ~ v )
+summary(m1)
+```
+*The regression above reports t-statistics for mean heights of choir group factor variables against a reference of bass. The t-statistic for alto vs bass is -9.961, soprano vs bass is -11.129, and tenor vs bass is -2.267*
+
+```{r}
+v <- as.factor(dat$voice)
+v <- relevel(v, ref = "soprano")
+m1 <- lm( h ~ v )
+summary(m1)
+```
+*The regression above reports t-statistics for mean heights of choir group factor variables against a reference of soprano. The t-statistic for alto vs soprano is 1.065, soprano vs bass is 11.129, and tenor vs soprano is 6.987*
+
+
+```{r}
+v <- as.factor(dat$voice)
+v <- relevel(v, ref = "tenor")
+m1 <- lm( h ~ v )
+summary(m1)
+```
+*The regression above reports t-statistics for mean heights of choir group factor variables against a reference of tenor. The t-statistic for alto vs tenor is -6.050, tenor vs bass is 2.267, and tenor vs soprano is -6.987*
+
+You can inspect the factor variables from an `lm` object using its `xlevels`
+field.
+
+```{r}
+m1$xlevels
+```
+
+
+```{r}
+mat <- matrix(data = c(NA, 9.961,-1.065,6.050,-9.961,NA,-11.129,-2.267,1.065,11.129,NA,6.987,-6.050,2.267,-6.987,NA), ncol = 4, nrow = 4)
+v <- relevel(v, ref = "alto")
+colnames(mat) <- levels(v)
+rownames(mat) <- levels(v)
+mat
+```
+

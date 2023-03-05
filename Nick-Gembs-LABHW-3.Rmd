@@ -1,0 +1,360 @@
+---
+title: "LABHW-3"
+author: "Nick Gembs"
+date: "2/26/2021"
+output: word_document
+---
+
+
+1.	Examples given by TAs
+
+
+A **simple linear regression** model relates the response variable $Y_i$ and a single predictor variable $X_i$ as follows:
+
+$$Y_i=β_0+β_1 X_i+ϵ_i$$
+
+where
+	$Y_i$ is the value of the response in the i^th trial
+	$β_0$,$β_1$ are parameters
+	$X_i$ is the value of the predictor in the i^th trial, and is a known constant
+	$ϵ_i$ is the random error on the i^th trial where E($ϵ_i$)=0, V($ϵ_i$)=σ^2>0, and Cov($ϵ_i$,$ϵ_j$)=0 for all i≠j
+
+```{r}
+#create plotting region
+
+plot.new()
+plot.window(xlim = c(0,10), ylim = c(-5,26))
+axis(1, pos = 0)
+axis(2, pos = 0)
+
+#simulate a linear regression
+#regression function E(Y|X) = beta0 + beta1X
+
+EY_ <- function(x) {
+  beta0 <- 1
+  beta1 <- 2
+  y<- beta0 + (beta1*x)
+  return(y)
+}
+
+x <- 1
+samp.size.at.x <- 300
+error2 <- runif(samp.size.at.x, min = -5, max = 5)
+
+#create response vector Y = E(Y|X) + error2
+
+y <- EY_(x) + error2
+
+points(rep(x,samp.size.at.x), y, col = 1:samp.size.at.x, pch = 20)
+
+mean_y <- mean(y)
+points(x, mean_y, pch = 19, cex = 2)
+
+
+#rerun with new x
+x<- 2.2
+samp.size.at.x <- 200
+error2 <- runif(samp.size.at.x, min = -5, max = 5)
+
+#create response vector Y = E(Y|X) + error2
+
+y <- EY_(x) + error2
+
+points(rep(x,samp.size.at.x), y, col = 1:samp.size.at.x, pch = 20)
+
+mean_y <- mean(y)
+points(x, mean_y, pch = 19, cex = 2)
+
+#now x=6
+x<- 6
+samp.size.at.x <- 175
+error2 <- runif(samp.size.at.x, min = -5, max = 5)
+
+#create response vector Y = E(Y|X) + error2
+
+y <- EY_(x) + error2
+
+points(rep(x,samp.size.at.x), y, col = 1:samp.size.at.x, pch = 20)
+
+mean_y <- mean(y)
+points(x, mean_y, pch = 19, cex = 2)
+
+
+
+
+#Can use a for loop
+usable.x <- c(3.6, 7.8, 9.2, 1.2, 8.8, 5, 6.7)
+ln <- length(usable.x)
+usable.samp.size <- rep(3, times = ln)
+
+for (i in 1:ln) {
+  #select which x value we want
+  x <- usable.x[i]
+  samp.size.at.x <- usable.samp.size[i]
+  
+  error2 <- runif(samp.size.at.x, min = -5, max = 5)
+
+  #create response vector Y = E(Y|X) + error2
+
+  y <- EY_(x) + error2
+
+  points(rep(x,samp.size.at.x), y, col = 1:samp.size.at.x, pch = 20)
+
+  mean_y <- mean(y)
+  points(x, mean_y, pch = 15, cex = 2)
+}
+
+#add regression curve
+curve(EY_(x), from = 0, to = 11, add = T)
+```
+
+
+\newpage
+
+2.  Suppose W is a random variable with a mean and variance that are both integers. The rMysteryGenerator function given below generates random numbers from the distribution of W. Display a point estimate for the mean and variance of W. Explain where your estimate came from. (Hint: Use the function, don’t examine the code.)
+
+```{r}
+
+rMysteryGenerator <- function(n){
+  a <- runif(n)
+  b <- -log(a)
+  return(b)
+}
+
+w <- rMysteryGenerator(10000)
+
+MeanW <- mean(w)
+Varw = var(w)
+MeanW
+Varw
+
+```
+A point estimate of mean of w is `rMeanW`. A point estimate of the variance of w is `Varw`. These estimates came from a 10,000 value sample of rMysteryGenerator.
+
+
+3.  Based on your result from Question #2, create a new random variable Z. Z should have a mean of zero and a variance of 10. Z should be a linear transformation of W. Explain how you did it. Demonstrate (approximately) that Z has the correct mean and standard deviation.
+
+```{r}
+
+Z <- sqrt(10)*(w-1)
+MeanZ <- mean(Z)
+VarZ <- var(Z)
+MeanZ
+VarZ
+StdZ <- sqrt(VarZ)
+StdZ
+```
+The mean of Z is `r MeanZ`. The variance of Z is `r VarZ`. The Standard Deviation of Z is `r StdZ`. In order to perform this linear transformation, I subtracted 1 from w to decrease the mean to 0 and then multiplied that by root(10) in order to increase the variance to 10.
+
+\newpage
+
+4.  Using Z from question #3 as the error term, create a graph using the following regression model:
+	$Y_i$=$β_0$+$β_1$ $X_i$+$β_2$ $X_i$^2+$ϵ_i$
+	$β_0$=0,$β_1$=1,$β_2$=1 are parameters
+	$X_i$ are constants between -2 and 5. ( Pick at least 5 different values. Display them. Indicate what they are outside of your code chunk)
+	$ϵ_i$ is the random error on the i^th trial where E($ϵ_i$)=0, V($ϵ_i$)=10, and Cov($ϵ_i$,$ϵ_j$)=0 for all i≠j.
+
+```{r}
+
+ei <- 0
+b0 <- 0
+b1 <- 1
+b2 <- 1
+
+plot.new()
+plot.window(xlim = c(-2,10), ylim = c(-5,35))
+axis(1, pos = 0)
+axis(2, pos = 0)
+
+EYi_ <- function(xi) {
+  b0 <- 0
+  b1 <- 1
+  b2 <- 1
+  yi<- b0 + (b1*xi)+(b2*xi^2) 
+  return(yi)
+}
+
+xi <- 1
+sampsize <- 300
+error2 <- rnorm(sampsize, 0, 10)
+
+usable.x <- c(-2,-1,0,1,2,3,4,5)
+ln <- length(usable.x)
+usable.samp.size <- rep(40, times = ln)
+
+for (i in 1:ln) {
+  #select which x value we want
+  xi <- usable.x[i]
+  sampsize <- usable.samp.size[i]
+  
+  error2 <- rnorm(sampsize, 0, 10)
+
+  #create response vector Y = E(Y|X) + error2
+
+  yi <- EYi_(xi) + error2
+
+  points(rep(xi,sampsize), yi, col = 1:sampsize, pch = 20)
+
+  mean_yi <- mean(yi)
+  points(xi, mean_yi, pch = 15, cex = 2)
+}
+
+
+
+```
+
+
+\newpage
+
+5.	A substance used in biological and medical research is shipped by airfreight to users in cartons of 1,000 ampules. The ‘Airfreight’ dataset collected the fnumber o times the carton was transferred from one aircraft to another over the shipment route (X) and the number of ampules found to be broken upon arrival (Y). Assume that the linear regression model is appropriate.
+
+```{r}
+
+
+NumberBroken <- c(16, 9 ,17 ,12 ,22 ,13 ,8 ,15 ,19 ,11)
+NumberTransferred <- c(1,0, 2, 0, 3, 1, 0, 1, 2, 0)
+
+par(mfrow = c(1,3))
+plot(NumberTransferred, NumberBroken, main = "Part B")
+
+MeanT <- mean(NumberTransferred)
+MeanB <- mean(NumberBroken)
+
+
+b1 <- (sum((NumberTransferred-MeanT)*(NumberBroken-MeanB)))/(sum((NumberTransferred-MeanT)^2))
+
+b0 <- MeanB - MeanT * b1
+
+
+EY <- function(x) {
+  beta0 <- b0
+  beta1 <- b1
+  y<- beta0 + (beta1*x)
+  return(y)
+}
+curve(EY, from = 0, to = 3, add = T)
+
+zeroT <- EY(0)
+oneT <- EY(1)
+twoT <- EY(2)
+threeT <- EY(3)
+fittedvalues <- c(EY(1), EY(0), EY(2), EY(0), EY(3), EY(1), EY(0), EY(1), EY(2), EY(0))
+
+ln <- length(NumberBroken)
+
+Residual <- rep(NA, times = ln)
+
+for (i in 1:ln) {
+  Residual[i] <- NumberBroken[i] - EY(NumberTransferred[i])
+}
+
+hist(Residual, main = "Part G")
+
+
+plot(fittedvalues, Residual, main = "Part H")
+meanres <- mean(Residual)
+abline(a= meanres, b = 0, col = "red")
+
+eiei <- sum((Residual)^2)
+
+
+MSE <- (1/10)*eiei
+
+
+
+```
+
+a.	The estimated regression function is Y= `r b0` + `r b1` * X.
+b.	The estimated number of broken ampules when 1 transfer is made is `r oneT`.
+c.	The increase in the expected number of ampules broken when that are 2 transfers instead of 1 is `r twoT`.
+d. 	The sum of the squared residuals is `r eiei`. The MSE is `r MSE`.
+e.	The MSE estimates the difference between the observed value and the mean value that the model predicts.
+f. 	y = 9999999 + `r b1` * x
+
+
+\newpage
+
+6.	A criminologist studying the relationship between level of education and crime rate in medium-sized U.S. counties collected their data in the ‘Crime’ dataset. HSDiploma is the percentage of individuals in the county having at least a high school diploma and CrimeRate is the number of crimes reported per 100,000 residents. Assume that the simple linear regression model is appropriate. ( Same rules as number 5. )
+
+```{r}
+
+Crime <- read.csv("C:/Users/Nick/Downloads/Crime.csv")
+par(mfrow = c(1,3))
+
+v <- rep(1, 84)
+
+z <- c(v, Crime$HSDiploma)
+
+y <- matrix(Crime$CrimeRate)
+
+mat <- matrix(z, 84, 2, F)
+
+meany <- mean(y)
+
+plot(Crime$HSDiploma, Crime$CrimeRate, main = "Part B")
+
+MeanX <- mean(Crime$HSDiploma)
+MeanY <- mean(Crime$CrimeRate)
+
+
+b1 <- (sum((Crime$HSDiploma-MeanX)*(Crime$CrimeRate-MeanY)))/(sum((Crime$HSDiploma-MeanX)^2))
+
+b0 <- MeanY - MeanX * b1
+
+
+EY <- function(x) {
+  beta0 <- b0
+  beta1 <- b1
+  y<- beta0 + (beta1*x)
+  return(y)
+}
+
+curve(EY, from = 60, to = 95, add = T)
+
+OnePDifference <- (b1*1)
+eighty <- EY(80)
+
+fitted <- rep(NA, 84)
+for (i in 1:84) {
+  
+  fitted[i] <- EY(Crime$HSDiploma[i])
+}
+
+maximum <- max(fitted)
+minimum <- min(fitted)
+
+
+Residual <- rep(NA, times = 84)
+
+for (i in 1:84) {
+  Residual[i] <- Crime$CrimeRate[i] - EY(Crime$HSDiploma[i])
+}
+
+hist(Residual, main = "Part G")
+
+maximumRes <- max(Residual)
+minimumRes <- min(Residual)
+
+plot(fitted, Residual, main = "Part H")
+meanres <- mean(Residual)
+abline(a= meanres, b = 0, col = "red")
+
+eiei <- sum((Residual)^2)
+
+
+MSE <- (1/10)*eiei
+
+```
+a.	The estimated regression function is Y= `r b0` + `r b1`*X.
+    The regression equation does appear to be a good fit for the data with a general downward slope although the data does not appear to be highly correlated.
+b.	The estimated difference in mean crime rate for two counties whose high school graduation rates differ by one percentage point is `r OnePDifference`.
+c.	The estimated mean crime rate in a county with an 80% graduation rate `r eighty`.
+d.	The largest and smallest fitted values are `r maximum` and `r minimum`, respectively.
+e.	The largest and smallest residuals are `r maximumRes` and `r minimumRes`, respectively.
+f.	The sum of the squared residuals is `r eiei`. The MSE is `r MSE`.
+
+
+\newpage
+
+7.  Imagine a simple linear regression model where $β_0$=0.
+

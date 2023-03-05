@@ -1,0 +1,341 @@
+---
+title: "Lab-HW-6"
+author: "Nick Gembs"
+date: "3/26/2021"
+output: word_document
+---
+
+Problem #1: Each row of the following matrix contains scatterplots produced by taking simulating samples of various sizes. The sample size is listed on top of each scatterplot. A simple linear regression model with normal errors was used to generate the sample for each scatterplot. However, one parameter of the model was changed that caused the correlation coefficient to decrease as you move from left to right. Using a sample size of 100, create a row of graphs that mimic the picture. You do not need to have the same corelation coefficients, but the first should be greatr than .99, the lowest less than .25, and the incremental decrease should be approximatly the same between graphs. Hint: Figure out how to control the correlation, before you spend time trying to figure out how to make five graphs in a row.
+
+```{r}
+
+par(mfrow = c(4,5), pin = c(.5,.5))
+
+
+sd <- c(.1,.5, 2, 5, 10 )
+n <- c(10,20,40,100)
+
+
+
+for (i in 1:5) {
+  beta1 <- 1
+
+  x <- c(1:10)
+  #y <- beta1*x + rnorm(1, mean = 0, sd = 1)
+
+  length <- length(x)
+  yi <- rep(NA, times = length)
+  sd1 <- sd[i]
+  
+  for (i in 1:10) {
+    beta1 <- 1
+    r <- rnorm(1, mean = 0, sd = sd1)
+    y<- (beta1*i) +r
+    yi[i] <- y
+  }
+  
+  correlation <- cor(x,yi)
+  plot(x,yi, main = c("n=10, cor=",round(correlation,3)))
+
+}
+
+
+
+for (i in 1:5) {
+  beta1 <- 1
+
+  x <- c(1:20)
+  #y <- beta1*x + rnorm(1, mean = 0, sd = 1)
+
+  length <- length(x)
+  yi <- rep(NA, times = length)
+  sd1 <- sd[i]
+  
+  for (i in 1:20) {
+    beta1 <- 1
+    r <- rnorm(1, mean = 0, sd = sd1*2)
+    y<- (beta1*i) +r
+    yi[i] <- y
+  }
+  
+  correlation <- cor(x,yi)
+  plot(x,yi, main = c("n=20, cor=",round(correlation,3)))
+
+}
+
+
+for (i in 1:5) {
+  beta1 <- 1
+
+  x <- c(1:40)
+  #y <- beta1*x + rnorm(1, mean = 0, sd = 1)
+
+  length <- length(x)
+  yi <- rep(NA, times = length)
+  sd1 <- sd[i]
+  
+  for (i in 1:40) {
+    beta1 <- 1
+    r <- rnorm(1, mean = 0, sd = sd1*4)
+    y<- (beta1*i) +r
+    yi[i] <- y
+  }
+  
+  correlation <- cor(x,yi)
+  plot(x,yi, main = c("n=40, cor=",round(correlation,3)))
+
+}
+
+
+for (i in 1:5) {
+  beta1 <- 1
+
+  x <- c(1:100)
+  #y <- beta1*x + rnorm(1, mean = 0, sd = 1)
+
+  length <- length(x)
+  yi <- rep(NA, times = length)
+  sd1 <- sd[i]
+  
+  for (i in 1:100) {
+    beta1 <- 1
+    r <- rnorm(1, mean = 0, sd = sd1*10)
+    y<- (beta1*i) +r
+    yi[i] <- y
+  }
+  
+  correlation <- cor(x,yi)
+  plot(x,yi, main = c("n=100, cor=",round(correlation,3)))
+
+}
+
+```
+\newpage
+
+Problem #2: An engineer at a medical device company wants to compare his companys new monitor to a similar existing monitor made by a different company. To collect data, conditions were set so that the new monitor displayed predetermined readings. Then readings were made from the Existing monitor. The data is as follows:
+
+
+
+```{r}
+
+x <- c(100  ,122  ,129,136,110,111,137  ,134,141,112,110,121,131,140,118,108,129,137,135,109,107,113,128,142,109,103,122,133,140,107,106    ,128      ,125      ,140      ,118      ,108  ,121)      
+
+y <- c(100  ,120, 132, 139, 110, 110, 137, 133, 140, 112, 110, 120, 133, 140, 119, 108, 126, 135, 135, 108, 108, 113, 130, 142, 109, 100, 122, 134, 140, 111, 108, 130, 125, 140, 118, 108, 118)
+
+#a.	Create a scatterplot. Does there appear to be a strong linear relationship between the New monitors reading and the existing machine?
+ plot(x,y)
+ paste("Yes, there does appear to be a strong linear relationship.")
+
+#b.	Based on how the data is collected, which variable should be considered the response.
+
+ paste("The existing monitor reading would be considered the response.")
+
+#c.	Determine the correlation between the readings from the two machines.
+
+ correlation <- cor(x,y)
+ correlation
+
+#d.	Estimate the intercept and slope.
+
+Meany <- mean(y)
+Meanx <- mean(x)
+
+b1 <- (sum(((x-Meanx)*(y-Meany))/(x-Meanx)^2))
+
+b1
+
+b0 <- Meany - Meanx * b1
+
+b0
+
+#e.	Estimate the mean square error.
+
+lm.fit <- lm(y~x)
+summary(lm.fit)
+MSE <- (1.628)^2
+MSE
+
+#f.	Determine the first residual.
+
+e1 <- 100 - (b0 + b1*100)
+e1
+
+#g.	If conditions are going to be set so that the NEW machine reads 123, predict, with 90% confidence, the reading on the EXISTING monitor.
+
+n <- data.frame(x = c(123))
+predict(lm.fit, newdata = n, interval = "prediction", level = 0.9, se.fit = T)
+```
+
+\newpage
+
+
+Problem #3: A scientist is studying the amount of heat produced from different cement mixtures. In the cement mixtures, they scientist uses different amounts of four ingredients: X1 - tricalcium aluminate, X2 - tricalcium silicate, X3 - tetracalcium aluminoferrite, and X4 - dicalcium silicate. Assuming all assumptions are satisfied, answer the following questions. The dataset is called Cement.
+
+```{r}
+
+Cement <- read.csv("C:/Users/Nick/Downloads/Cement (12).csv", header=FALSE)
+
+#a.	Create a scatterplot matrix. Visually, does there appear to be a strong linear relationship between Heat.Evolved and any of the predictors. Which have a positive relationship with Heat.Evolved?
+
+names(Cement)[1] <- "Heat.Evolved"
+names(Cement)[2] <- "X1"
+names(Cement)[3] <- "X2"
+names(Cement)[4] <- "X3"
+names(Cement)[5] <- "X4"
+pairs(~ Heat.Evolved+X1+X2+X3+X4, data = Cement)
+
+paste("Heat.Evolved, does not appear to have a strong linear relationship with any of the predictors. However, X1, and X2, have a positive relationship with Heat.Evolved.")
+
+#b.	Create a correlation matrix. Do the values in the correlation matrix agree with what visually appears in the scatterplot matrix? Explain.
+
+cor(Cement)
+paste("The values in the correlation matrix do align with the scatterplot matrix, none of the predictors are strongly correlated with Heat.Evolved, but X1 and X2 do have a positive correlation.")
+
+#c.	Display the names of each variable in the Cement dataset using an R command.
+
+
+colnames(Cement)
+
+#d.	Estimate the coefficients for each predictor variable. Indicate the coefficient along with each type of ingredient using 4 sentences and inline code.
+
+Meany <- mean(Cement$Heat.Evolved)
+Meanx <- mean(Cement$X1)
+
+b11 <- (sum(((Cement$X1-Meanx)*(Cement$Heat.Evolved-Meany))/(Cement$X1-Meanx)^2))
+
+b01 <- Meany - Meanx * b11
+
+
+
+Meany <- mean(Cement$Heat.Evolved)
+Meanx2 <- mean(Cement$X2)
+
+b12 <- (sum(((Cement$X2-Meanx2)*(Cement$Heat.Evolved-Meany))/(Cement$X2-Meanx2)^2))
+b02 <- Meany - Meanx2 * b12
+
+
+Meany <- mean(Cement$Heat.Evolved)
+Meanx3 <- mean(Cement$X3)
+
+b13 <- (sum(((Cement$X3-Meanx3)*(Cement$Heat.Evolved-Meany))/(Cement$X3-Meanx3)^2))
+b03 <- Meany - Meanx3 * b13
+
+Meany <- mean(Cement$Heat.Evolved)
+Meanx4 <- mean(Cement$X4)
+
+b14 <- (sum(((Cement$X4-Meanx4)*(Cement$Heat.Evolved-Meany))/(Cement$X4-Meanx4)^2))
+b04 <- Meany - Meanx4 * b14
+
+
+#e.	Estimate the mean square error.
+
+lm.fit1 <- lm (Cement$Heat.Evolved~Cement$X1)
+MsE1 <- (10.73)^2
+
+lm.fit2 <- lm (Cement$Heat.Evolved~Cement$X2)
+MSE2 <- (9.077)^2
+
+lm.fit3 <- lm (Cement$Heat.Evolved~Cement$X3)
+MSE3 <- (13.28)^2
+
+lm.fit4 <- lm (Cement$Heat.Evolved~Cement$X4)
+MSE4 <- (8.964)^2
+
+#f.	Determine the first residual.
+
+e1 <- 78.5 - (b01 + b11*7)
+e1
+
+e2 <- 78.5 - (b02 + b12*26)
+e2
+
+e3 <- 78.5 - (b03 + b13*6)
+e3
+
+e4 <- 78.5 - (b04 + b14*60)
+e4
+
+#g.	Estimate the mean amount of heat produced if the amount of tricalcium aluminate is 7, tricalcium silicate is 29, tetracalcium aluminoferrite is 10, and dicalcium silicate is 53.
+
+b00 <- mean(b01,b02,b03,b04)
+b00
+Y1 <- b00 + b11*7 +b12*29 + b13*10 + b14*53
+Y1
+```
+
+For X1, the beta0 is `r b01` and the beta1 is `r b11`.
+For x2, the beta0 is `r b02` and the beta1 is `r b12`
+For x3, the beta0 is `r b03` and the beta1 is `r b13`
+For x4, the beta0 is `r b04` and the beta1 is `r b14`
+
+After writing all of this code, I now realize I could have done this using an lm.fit function and taking the coefficients from the summary. This would get similar results.
+
+For X1, the first residual is `r e1`
+For X2, the first residual is `r e2`
+For X3, the first residual is `r e3`
+For X4, the first residual is `r e4`
+
+The estimate is `r Y1`
+
+
+\newpage
+
+
+Problem #4: Simulate a dataset with 10 observations that have a perfectly linear relationship. The intercept parameter is 5. The slope parameter is 4. ( 1.08 , 1.86 , 4.11 , 4.82 , 4.94 , 6 , 6.68 , 7.24 , 7.94 , 8.27 )
+
+```{r}
+
+#a.	Determine the equation of the least squares regression line for the mean response as a function of your predictor.
+
+x <- c(1.08 , 1.86 , 4.11 , 4.82 , 4.94 , 6 , 6.68 , 7.24 , 7.94 , 8.27)
+y <- 4*x+5
+
+paste("y = 4*x+5")
+
+#b.	Solve the equation for the predictor as a function of the mean response.
+
+x <- (y-5)/4
+
+paste("x = (y-5)/4")
+
+
+#c.	Determine the equation of the least squares regression line for the predictor variable as a function of the response.
+
+paste("x = (y-5)/4")
+
+#d.	Are the equations in the previous two parts the same? Why or why not?
+
+paste("yes because there is no error/variance. There is a perfectly linear relationship.")
+```
+\newpage
+
+Problem #5: Simulate a dataset with 10 observations from a simple linear regression model with normal errors. The intercept parameter is 5. The slope parameter is 4. The variance of the errors is 10. Use ( 1.08 , 1.86 , 4.11 , 4.82 , 4.94 , 6 , 6.68 , 7.24 , 7.94 , 8.27 ) as your predictor values.
+
+```{r}
+
+#a.	Determine the equation of the least squares regression line for the mean response as a function of your predictor.
+
+x <- c(1.08 , 1.86 , 4.11 , 4.82 , 4.94 , 6 , 6.68 , 7.24 , 7.94 , 8.27)
+y <- 4*x+5 + rnorm(1, mean=0, sd = sqrt(10))
+
+paste("y = 4*x+5 + rnorm(1, mean=0, sd = sqrt(10))")
+
+#b.	Solve the equation for the predictor as a function of the mean response.
+
+x <- (y-5-rnorm(1, mean = 0, sd=sqrt(10)))/4
+
+paste("x = (y-5-rnorm(1, mean = 0, sd=sqrt(10)))/4")
+
+#c.	Determine the equation of the least squares regression line for the predictor variable as a function of the response.
+
+x <- (y-5)/4
+
+paste("x = (y-5)/4")
+
+#d.	Are the equations in the previous two parts the same? Why or why not?
+
+paste("The equations in the previous 2 parts are different because there is error that has a mean of 0, therefore it is not included in the least squares regression line.")
+```
+
+
+

@@ -1,0 +1,254 @@
+---
+title: ""
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Statistical Computing - Exercises 04 - Ithaca Weather
+
+The US government, via its agencies NOAA and NCEI, maintains the US
+Climate Reference Network, a collection of 139 high quality weather
+stations whose purpose is to monitor atmospheric and soil
+conditions. One of them is located right here outside of Ithaca, along
+Route 38.
+
+We will be formatting and analyzing the hourly Ithaca data from 2021
+and 2022, with the goal of building a model for predicting afternoon
+temperatures. 
+
+1. Read the dataset `datasets/CRNH0203-2021-NY_Ithaca_13_E.txt` into R as a
+   data frame and add column names according to the
+   [**documentation**](https://www.ncei.noaa.gov/pub/data/uscrn/products/hourly02/).
+   Make sure you inspect your data frame and do any necessary cleaning.
+
+```{r}
+# Putting read.table & strsplit on separate lines for readability creates a
+#knitting error. All other lines formatted.
+
+dat <- read.table("C:/Users/Nick/Documents/GitHub/statcomp2023/datasets/CRNH0203-2021-NY_Ithaca_13_E.txt")
+columns = strsplit("WBANNO UTC_DATE UTC_TIME LST_DATE LST_TIME CRX_VN LONGITUDE LATITUDE T_CALC T_HR_AVG T_MAX T_MIN P_CALC SOLARAD SOLARAD_FLAG SOLARAD_MAX SOLARAD_MAX_FLAG SOLARAD_MIN SOLARAD_MIN_FLAG SUR_TEMP_TYPE SUR_TEMP SUR_TEMP_FLAG SUR_TEMP_MAX SUR_TEMP_MAX_FLAG SUR_TEMP_MIN SUR_TEMP_MIN_FLAG RH_HR_AVG RH_HR_AVG_FLAG SOIL_MOISTURE_5 SOIL_MOISTURE_10 SOIL_MOISTURE_20 SOIL_MOISTURE_50 SOIL_MOISTURE_100 SOIL_TEMP_5 SOIL_TEMP_10 SOIL_TEMP_20 SOIL_TEMP_50 SOIL_TEMP_100", split = " ")
+
+colnames(dat) <- columns[[1]]
+
+
+
+for (i in columns){
+   
+   holder = dat[i]
+   holder = replace(holder,(dat[i] == -999.0), NA )
+   holder = replace(holder,(dat[i] == -9999.0), NA )
+   holder = replace(holder,(dat[i] == -99999.0), NA )
+
+   dat[i] = holder
+}
+
+
+```
+
+
+
+
+2. Save the data frame to your computer using both `save` and `saveRDS`. What
+   are the two file sizes, and how do the sizes compare to the size of the
+   original .txt file? (You can check this in the terminal with the command
+   `ls -lah`)
+
+```{r}
+saveRDS(dat, file = "C:/Users/Nick/Documents/weatherdat.rds")
+
+save(dat, file = "C:/Users/Nick/Documents/weatherdat.RData")
+```
+The saved files are 204 KB, which is much smaller than the 2096 KB text
+document.
+
+3. Create a data frame containing only the longitude and latitude. Save the
+   result as both a .csv and a .RData file. How do the sizes compare? Is this
+   surprising to you? Can you explain the results?
+   
+```{r}
+dat1 = dat[, c("LONGITUDE", "LATITUDE")]
+
+save(dat1, file = "C:/Users/Nick/Documents/weatherdatlonglat.RData")
+save(dat1, file = "C:/Users/Nick/Documents/weatherdatlonglat2.csv")
+write.csv(dat1, file = "C:/Users/Nick/Documents/weatherdatlonglat.csv")
+```
+Both save files are only 1 KB, this is surprising because the Rdata file should 
+be smaller due to compression. This is likely happening because the stored data
+is still being compressed, and then sent to csv when using the save function. 
+When you directly write to a csv file, the size is much larger (179 kb). This
+is because write.csv does not undergo compression.
+
+The Rdata file is only 1 KB while the csv file is 179 KB. This is because 
+RData files undergo compression while csv files only separate the values with
+a comma.
+
+4. Create a new data frame that has one row for each day. Its columns should be
+   the date, 3pm air temperature (use local standard time for all times and
+   T_CALC for all air temperatures), 6am temperature, 7am temperature, 8am
+   temperature, and 9am temperature.
+   
+```{r}
+dat2 <- dat[(dat["LST_TIME"] == 600) | (dat["LST_TIME"] == 700) |
+               (dat["LST_TIME"] == 800) 
+            | (dat["LST_TIME"] == 900) | (dat["LST_TIME"] == 1500) ,
+            c("T_CALC","LST_TIME","LST_DATE")]
+
+date <- unique(dat2["LST_DATE"])
+sixAM <- dat2[dat2["LST_TIME"]==600,"T_CALC"]
+sevenAM <- dat2[dat2["LST_TIME"]==700,"T_CALC"]
+eightAM <- dat2[dat2["LST_TIME"]==800,"T_CALC"]
+nineAM <- dat2[dat2["LST_TIME"]==900,"T_CALC"]
+threePM <- dat2[dat2["LST_TIME"]==1500,"T_CALC"]
+
+newdat<- data.frame(date,sixAM,sevenAM,eightAM,nineAM,threePM,
+                    row.names = 1:365)
+head(newdat)
+
+```
+
+
+
+5. Do a multiple regression of 3pm temperature on 6am, 7am, 8am, and 9am
+   temperature and print out the summary. How accurate does the model say your
+   predictions should be?
+
+```{r}
+m1 <- lm(newdat$threePM ~ newdat$sixAM + newdat$sevenAM + newdat$eightAM + 
+            newdat$nineAM)
+summary(m1)
+```
+With an F-statistic of 1081 and a p-value less than 2.2e-16, we can reject a
+null hypothesis of there being no relation between 6-9 am temps and 3 pm
+temp. Since the residual standard error is 3.027, the model claims that 
+predictions will be within 3.027 degrees of observed ~68% (1 sd) of the time,
+and within 6.054 degrees of observed ~95% (2 sd) of the time.
+
+
+6. Use your model to predict 2022 3pm temperatures from morning temperatures.
+   You'll have to read in the 2022 data and organize it the same way you
+   organized the 2021 data. Report the root mean squared prediction error and
+   make a plot of the model's prediction errors against day of year.
+```{r}
+dat_ <- read.table("C:/Users/Nick/Documents/GitHub/statcomp2023/datasets/CRNH0203-2022-NY_Ithaca_13_E.txt")
+columns = strsplit("WBANNO UTC_DATE UTC_TIME LST_DATE LST_TIME CRX_VN LONGITUDE LATITUDE T_CALC T_HR_AVG T_MAX T_MIN P_CALC SOLARAD SOLARAD_FLAG SOLARAD_MAX SOLARAD_MAX_FLAG SOLARAD_MIN SOLARAD_MIN_FLAG SUR_TEMP_TYPE SUR_TEMP SUR_TEMP_FLAG SUR_TEMP_MAX SUR_TEMP_MAX_FLAG SUR_TEMP_MIN SUR_TEMP_MIN_FLAG RH_HR_AVG RH_HR_AVG_FLAG SOIL_MOISTURE_5 SOIL_MOISTURE_10 SOIL_MOISTURE_20 SOIL_MOISTURE_50 SOIL_MOISTURE_100 SOIL_TEMP_5 SOIL_TEMP_10 SOIL_TEMP_20 SOIL_TEMP_50 SOIL_TEMP_100", split = " ")
+
+colnames(dat_) <- columns[[1]]
+
+holder = dat$T_CALC
+holder = replace(holder,(dat$T_CALC == -9999.0), NA )
+
+dat_$T_CALC = holder
+
+dat2_ <- dat_[(dat_["LST_TIME"] == 600) | (dat_["LST_TIME"] == 700) | 
+                 (dat_["LST_TIME"] == 800) 
+            | (dat_["LST_TIME"] == 900) | (dat_["LST_TIME"] == 1500) ,
+            c("T_CALC","LST_TIME","LST_DATE")]
+#dat2
+
+date <- unique(dat2_["LST_DATE"])
+sixAM <- dat2_[dat2_["LST_TIME"]==600,"T_CALC"]
+sevenAM <- dat2_[dat2_["LST_TIME"]==700,"T_CALC"]
+eightAM <- dat2_[dat2_["LST_TIME"]==800,"T_CALC"]
+nineAM <- dat2_[dat2_["LST_TIME"]==900,"T_CALC"]
+threePM <- dat2_[dat2_["LST_TIME"]==1500,"T_CALC"]
+
+newdat_<- data.frame(date,sixAM,sevenAM,eightAM,nineAM,threePM,
+                     row.names = 1:365)
+
+predictions <- predict(m1, newdata = newdat_)
+
+perrors = predictions-threePM
+predictionerrors = abs(predictions-threePM)
+rmse = sqrt(sum((predictionerrors[(is.na(predictionerrors)==F)])^2)/365)
+rmse
+
+plot(1:365, perrors, xlab = "day", ylab = "Model Prediction Error")
+
+```
+The model rmse is `r rmse`
+
+7. Build your own model for 3pm temperatures based on the 2021 data. You can
+   use any information in the data, and any kind of model you like, but you
+   must use only information that's available at the 9am hour or earlier (e.g.
+   you cannot use today's 2pm temperature to predict today's 3pm temperature).
+```{r}
+dat2 <- dat[ (dat["LST_TIME"] == 500) |(dat["LST_TIME"] == 700) | 
+                (dat["LST_TIME"] == 800) 
+            | (dat["LST_TIME"] == 900) | (dat["LST_TIME"] == 1500) , ]
+
+date <- unique(dat2["LST_DATE"])
+minsunrise = dat2[dat2["LST_TIME"]==500,"T_MIN"]
+max9am = dat2[dat2["LST_TIME"]==900,"T_MAX"]
+fourhourtempchange = max9am-minsunrise
+sevenAM <- dat2[dat2["LST_TIME"]==700,"T_CALC"]
+eightAM <- dat2[dat2["LST_TIME"]==800,"T_CALC"]
+nineAM <- dat2[dat2["LST_TIME"]==900,"T_CALC"]
+threePM <- dat2[dat2["LST_TIME"]==1500,"T_CALC"]
+
+sevenAMrain <- dat2[dat2["LST_TIME"]==700,"P_CALC"]
+eightAMrain <- dat2[dat2["LST_TIME"]==800,"P_CALC"]
+nineAMrain <- dat2[dat2["LST_TIME"]==900,"P_CALC"]
+
+nineAMSOLARAD <- dat2[dat2["LST_TIME"]==900,"SOLARAD"]
+nineAMSoil <- dat2[dat2["LST_TIME"]==900,"SOIL_TEMP_5"]
+
+rain <- sevenAMrain + eightAMrain + nineAMrain
+
+newdat<- data.frame(date,sevenAM,eightAM,nineAM,fourhourtempchange, rain , 
+                    nineAMSOLARAD, nineAMSoil ,threePM, row.names = 1:365)
+
+
+m1 <- lm(newdat$threePM ~ newdat$fourhourtempchange + newdat$sevenAM + 
+            newdat$eightAM + newdat$nineAM + newdat$sevenAM*newdat$nineAM
+         + newdat$rain + newdat$nineAMSOLARAD + newdat$nineAMSoil)
+summary(m1)
+```
+   
+
+8. Test out your model on the 2022 data. Report the root mean squared
+   prediction error and make a plot of the model's prediction errors against
+   day of year.
+   
+```{r}
+
+dat2_ <- dat_[(dat_["LST_TIME"] == 500) | (dat_["LST_TIME"] == 700) | 
+                 (dat_["LST_TIME"] == 800) 
+            | (dat_["LST_TIME"] == 900) | (dat_["LST_TIME"] == 1500) ,]
+#dat2
+
+date <- unique(dat2_["LST_DATE"])
+minsunrise = dat2_[dat2_["LST_TIME"]==500,"T_MIN"]
+max9am = dat2_[dat2_["LST_TIME"]==900,"T_MAX"]
+fourhourtempchange = max9am-minsunrise
+sevenAM <- dat2_[dat2_["LST_TIME"]==700,"T_CALC"]
+eightAM <- dat2_[dat2_["LST_TIME"]==800,"T_CALC"]
+nineAM <- dat2_[dat2_["LST_TIME"]==900,"T_CALC"]
+threePM <- dat2_[dat2_["LST_TIME"]==1500,"T_CALC"]
+
+sevenAMrain <- dat2_[dat2_["LST_TIME"]==700,"P_CALC"]
+eightAMrain <- dat2_[dat2_["LST_TIME"]==800,"P_CALC"]
+nineAMrain <- dat2_[dat2_["LST_TIME"]==900,"P_CALC"]
+
+nineAMSOLARAD <- dat2_[dat2_["LST_TIME"]==900,"SOLARAD"]
+nineAMSoil <- dat2_[dat2_["LST_TIME"]==900,"SOIL_TEMP_5"]
+
+newdat_<- data.frame(date,sevenAM,eightAM,nineAM,fourhourtempchange, rain ,
+                     nineAMSOLARAD, nineAMSoil ,threePM, row.names = 1:365)
+
+predictions <- predict(m1, newdata = newdat_)
+
+perrors = predictions-threePM
+predictionerrors = abs(predictions-threePM)
+rmse = sqrt(sum((predictionerrors[(is.na(predictionerrors)==F)])^2)/365)
+rmse
+
+plot(1:365, perrors, xlab = "day", ylab = "Model Prediction Error")
+```
+   The model rmse is `r rmse`
+   
+   
+   
+   
+   

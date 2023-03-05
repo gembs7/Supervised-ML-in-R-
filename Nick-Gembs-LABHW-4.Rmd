@@ -1,0 +1,296 @@
+---
+title: "Nick-Gembs-LABHW4"
+author: "Nick Gembs"
+date: "3/5/2021"
+output: word_document
+---
+
+
+1. A simple linear regression model relates the response variable Y_i and a single predictor variable X_i as follows:
+
+$Y_i$=$β_0$+$β_1$ $X_i$+$ϵ_i$
+
+where
+	$Y_i$ is the value of the response in the i^th trial
+	$β_0$,$β_1$ are parameters
+	$X_i$ is the value of the predictor in the i^th trial, and is a known constant
+	$ϵ_i$ is the random error on the i^th trial where E($ϵ_i$)=0, V($ϵ_i$)=σ^2>0, and Cov($ϵ_i$,$ϵ_j$)=0 for all i≠j
+
+
+```{r}
+
+Galton <- read.csv("C:/Users/Nick/Downloads/Galton.csv")
+names(Galton)
+
+#plot
+plot(Galton$Father, Galton$Height, cex = .5)
+
+mean.by.father.height <- aggregate(Height~Father, data = Galton, FUN = mean)
+
+points(mean.by.father.height, col = "red", cex = 1.5, pch = 20)
+
+
+#Group similar heights
+Galton$Groups <- NA
+
+rng <- range(Galton$Father +c(-.01,.01))
+rng
+
+
+#groups = 4, boundaries = 5
+
+bound.ln <- 5
+
+dad.height.bounds <- seq(from = rng[1], to = rng[2], length = bound.ln )
+dad.height.bounds
+
+letters[1:3]
+
+#alternatively assign groups
+
+for (i in 1:bound.ln) {
+  Galton$Groups[Galton$Father >= dad.height.bounds[i]] <- letters[i]
+}
+
+plot(Galton$Father, Galton$Height, cex = .5)
+
+x1 <- aggregate(Father~Groups, data = Galton, FUN = mean)
+x1
+
+y1 <- aggregate(Height~Groups, data = Galton, FUN = mean)
+y1
+
+points(x1$Father, y1$Height, col = "red", cex = 1.5, pch = 20)
+
+```
+
+
+\newpage
+
+Problem #2: A scientist measured the yield from an experiment at several different temperatures (F). The data is contained in the YieldData.csv file. Answer the following questions. (Only one plot should be given for this problem)
+
+
+```{r}
+
+
+YieldData <- read.csv("C:/Users/Nick/Downloads/YieldData.csv")
+#1.	Plot the data
+
+
+plot(YieldData$Temp, YieldData$Yield)
+
+#2.	Does this appear to be following an increasing linear trend?
+
+#3.	Compute the equation for the least squares regression line.
+
+MeanX <- mean(YieldData$Temp)
+MeanY <- mean(YieldData$Yield)
+
+
+b1 <- (sum((YieldData$Temp-MeanX)*(YieldData$Yield-MeanY)))/(sum((YieldData$Temp-MeanX)^2))
+
+b0 <- MeanY - MeanX * b1
+
+
+EY <- function(x) {
+  beta0 <- b0
+  beta1 <- b1
+  y<- beta0 + (beta1*x)
+  return(y)
+}
+
+
+#4.	Add the least squares regression line to the existing plot.(It should be “darkgreen”.)
+
+curve(EY(x), from = 40, to = 80, add = T, col = "darkgreen")
+
+#5.	Estimate, with 98% confidence, the slope and intercept of the regression function.
+
+lm.fit <- lm(YieldData$Yield~YieldData$Temp)
+
+
+confint(lm.fit, parm = 1, level = .98)
+cii <- confint(lm.fit, parm = 1, level = .98)
+
+confint(lm.fit, parm = 2, level = .98)
+cis <- confint(lm.fit, parm = 2, level = .98)
+
+#6.	Do you think that the slope plays a role of great importance in this model?
+
+
+#7.	Estimate the mean yield when the temperature is 70F. Plot this point on the graph using a red star.
+
+points(70, EY(70),  col = "red", pch = 8)
+```
+
+2. Yes, the data does appear to be following an increasing linear trend
+6. Yes, slope plays a great importance in determining the average change in yield per unit change in temperature
+
+\newpage
+
+7. A substance used in biological and medical research is shipped by airfreight to users in cartons of 1,000 ampules. The ‘Airfreight’ dataset collected the number of times the carton was transferred from one aircraft to another over the shipment route (X) and the number of ampules found to be broken upon arrival (Y). Assume that the linear regression model is appropriate.
+
+```{r}
+
+`Airfreight.(1)` <- read.csv("C:/Users/Nick/Downloads/Airfreight (1).csv")
+
+#Obtain the estimated regression function.
+#Plot the estimated regression function and the data.
+
+
+plot(`Airfreight.(1)`$NumberTransfer, `Airfreight.(1)`$NumberBroken)
+
+MeanT <- mean(`Airfreight.(1)`$NumberTransfer)
+MeanB <- mean(`Airfreight.(1)`$NumberBroken)
+
+
+b1 <- (sum((`Airfreight.(1)`$NumberTransfer-MeanT)*(`Airfreight.(1)`$NumberBroken-MeanB)))/(sum((`Airfreight.(1)`$NumberTransfer-MeanT)^2))
+
+b0 <- MeanB - MeanT * b1
+
+
+EY <- function(x) {
+  beta0 <- b0
+  beta1 <- b1
+  y<- beta0 + (beta1*x)
+  return(y)
+}
+
+
+curve(EY(x), from = 0, to = 3, add = T)
+
+#Estimate, with 99% confidence, the increase in the expected number of ampules broken when 1 transfer is made.
+l <- lm(`Airfreight.(1)`$NumberBroken~`Airfreight.(1)`$NumberTransfer)
+
+
+confint(l, parm = 2, level = .99)
+cis <- confint(l, parm = 2, level = .99)
+
+onetransfer <- 1*cis
+
+
+#Estimate, with 99% confidence, the increase in the expected number of ampules broken when 2 transfers are made.
+
+l <- lm(`Airfreight.(1)`$NumberBroken~`Airfreight.(1)`$NumberTransfer)
+
+confint(l, parm = 2, level = .99)
+cis <- confint(l, parm = 2, level = .99)
+
+twotransfer <- 2*cis
+twotransfer
+
+
+#Are there any instances where there are no transfers made? If so, how many?
+
+paste("yes, there are 4 instances where no transfers are made")
+
+#Would an estimate of the intercept have practical importance for this problem? If yes, explain and construct a 98% confidence interval for it.
+
+paste("Yes, the intercept of this equation represents the number of ampules broken before any transfers have been made.")
+confint(lm.fit, parm = 1, level = .98)
+cii <- confint(lm.fit, parm = 1, level = .98)
+
+
+#Obtain an estimate for σ.
+
+sigma <- sum((l$residuals)^2)/l$df.residual
+sigma
+
+#Conduct a test to decide whether or not there is a linear association between the number of times a carton is transferred and number of broken ampules. Use a level of significance of 0.05. State your hypotheses, decision rule, and conclusion.
+length <- length(`Airfreight.(1)`$NumberBroken)
+dof <- 8
+a <- .05
+cv <- qt(a/2, df = dof, lower.tail = FALSE)
+cv
+t<- b1/sigma
+t
+```
+The regression function is Y = `r b0` + `r b1`*x
+The 99% confidence for 1 transfer is {2.426184, 5.573816}
+The 99% confidence for 2 transfers is {4.852368, 11.14763}
+The estimate for sigma is `r sigma`
+
+Yes, there are 4 instances where no transfers are made
+Yes, the intercept of this equation represents the number of ampules broken before any transfers have been made.
+
+H0: beta1 = 0
+H1: beta1 /= 0
+
+Since the t value is greater than the positive critical value, we reject the null and accept the alternative, beta1 is not equal to 0 and there is a linear association between the number of times a carton is transferred and number of broken ampules.
+
+
+\newpage
+
+8. A criminologist studying the relationship between level of education and crime rate in medium-sized U.S. counties collected their data in the ‘Crime’ dataset. HSDiploma is the percentage of individuals in the county having at least a high school diploma and CrimeRate is the number of crimes reported per 100,000 residents. Assume that the simple linear regression model is appropriate.
+
+```{r}
+
+Crime <- read.csv("C:/Users/Nick/Downloads/Crime.csv")
+
+#Obtain the estimated regression function.
+
+#Plot the estimated regression function and the data.
+
+plot(Crime$HSDiploma, Crime$CrimeRate)
+
+MeanX <- mean(Crime$HSDiploma)
+MeanY <- mean(Crime$CrimeRate)
+
+
+b1 <- (sum((Crime$HSDiploma-MeanX)*(Crime$CrimeRate-MeanY)))/(sum((Crime$HSDiploma-MeanX)^2))
+
+b0 <- MeanB - MeanT * b1
+
+
+EY <- function(x) {
+  beta0 <- b0
+  beta1 <- b1
+  y<- beta0 + (beta1*x)
+  return(y)
+}
+
+curve(EY(x), from = 0, to = 3, add = T)
+
+
+#Estimate, with 90% confidence, the increase in the expected crime rate when there is a 1 percent increase in individuals with at least a high school diploma.
+l <- lm( Crime$CrimeRate~Crime$HSDiploma)
+summary(l)
+
+confint(l, parm = 2, level = .9)
+cis <- confint(l, parm = 2, level = .9)
+
+onepercent <- 1*cis
+
+
+#Are there any instances where zero percent of a county had at least a high school diploma? If so, how many?
+
+#Would an estimate of the intercept have practical importance for this problem? If yes, explain and construct a 98% confidence interval for it.
+
+#Obtain an estimate for σ.
+
+sigma <- sum((l$residuals)^2)/l$df.residual
+sigma
+
+#Conduct a test to decide whether or not there is a linear association between the crime rate and percentage of high school graduates. Use a level of significance of 0.01. State your hypotheses, decision rule, and conclusion.
+
+dof <- 82
+a <- .01
+cv <- qt(a/2, df = dof, lower.tail = FALSE)
+cv
+t<- b1/sigma
+t
+
+```
+
+The regression function is Y = `r b0` + `r b1`*x
+The 90% confidence for 1 percent increase is {-239.7403, -101.4101}
+The estimate for sigma is `r sigma`
+
+No, there are zero instances where zero percent of a county had at least a high school diploma.
+No, the intercept does not have any practical importance in this problem.
+
+
+H0: beta1 = 0
+H1: beta1 /= 0
+
+Since the t value is less than the positive critical value, we accept the null, beta1 is equal to 0 and there is no linear associationbetween the crime rate and percentage of high school graduates.

@@ -1,0 +1,135 @@
+---
+title: "Lab/Homework 1"
+author: "Nick Gembs"
+date: "2/12/2021"
+output: word_document
+---
+
+
+Instructions:
+: Submit the completed homework through GradeScope via Canvas.
+
+ + Be sure to attach the questions to the appropriate page. Failure to do so will result in a deduction of points.
+ + Your submitted file should be a PDF. Most likely, this means that you will knit a WORD document, and then save that document as a PDF.
+ + Questions should be grouped on individual pages as follows: (1), (2), (3,4), (5,6,7) , (8)
+ + This is due one week from the day it is assigned. It must be submitted by 11:00PM. Late submissions will no be accepted.
+
+
+#Problems
+
+1. Examples given by TAs
+
+```{r}
+#Create and assign vectors
+
+X <- c(1,5,3,9)
+X
+Y <- c(5,2,0,8)
+Y
+
+#Math on X and Y Assign to new vectors aXY, sXY, mXY, dXY
+
+aXY <- X+Y
+aXY
+sXY <- X-Y
+sXY
+mXY <- X*Y
+mXY
+dXY <- X/Y
+dXY
+```
+The first element of the vector X is `r X[1]`. The first element of Y is `r Y[1]`. The sum of the first elements from each vector is `r X[1] + Y[1]`.
+
+```{r}
+#Sample a value from a vector
+
+sampx <- sample(X, size = 1, prob = c(.25,.25,.25,.25))
+sampx
+```
+The sample function selected `rsampx` .
+
+```{r}
+#Create a labeled histogram based on a 1000 times sample of vector Y.
+
+sampy <- sample(Y, size = 1000, prob =  c(.5,.25,.2,.05) , replace = TRUE)
+hist(sampy, xlab = "x-label", main = "Title")
+```
+
+\newpage
+
+2.	Create a Density Histogram (Help Menu) based on sampling a vector 10000 times. The sampled values should be 1,2,3,4, and 10. The frequency of 2 should be double the frequency of a 1. The frequency of 3,4 and 10 should be the same. The frequency of 4 should be one-quarter of the frequency of 1.
+
+```{r}
+X <- c(1,2,3,4,10)
+sampx <- sample(X, size = 10000, prob = c(.4,.8,.1,.1,.1), replace = T)
+hist(sampx, xlab = "x-label" , main = "Title")
+
+```
+
+
+\newpage
+
+3.  Create three vectors named $x$, $r$, and $g$. $x$ should contain the values 1-12 in increasing order. r should have length twelve and contain only ones. g should be of length 12 and contain the sequence 1,0,1,-1 repeated three times.
+
+```{r}
+x <- seq(from = 1, to = 12, by = 1)
+x
+r <- rep(1, times = 12)
+r
+g <- rep(c(1,0,1,-1), times = 3)
+g
+```
+
+
+4.  Determine $\langle x,r\rangle$, $\langle r,r\rangle$⟩, and $\langle g,r\rangle$⟩. Describe the result of taking the inner product of any vector with an appropriately long vector of ones. ( Do not describe how an inner product is computed.)
+
+```{r}
+
+xr <- sum(x*r)
+xr
+rr <- sum(r*r)
+rr
+gr <- sum(g*r)
+gr
+```
+
+\newpage
+
+5.	Create two matrices:
+
+```{r}
+
+matX <- matrix(data = x, nrow = 3, ncol = 4, byrow = TRUE)
+matX
+matY <- diag(x=2, nrow = 4, ncol = 4)
+matY
+
+```
+
+
+6.	Determine the product XY. Briefly, in 1 sentence, describe the effect of multiplying a matrix on the left by matrix Y.
+
+```{r}
+
+multiply <- matX%*%matY
+multiply
+
+```
+Multiplying a matrix by matrix Y is the same as a scalar multiplication of a matrix by a factor of 2. 
+
+
+
+7.	Explain why it is not possible determine YX. (Two sentences maximum.)
+
+It is not possible to determine product YX because matrix Y is a 4X4 matrix while matrix X is a 3X4 matrix. Since 3 is not equal to 4 and the inner dimensions of the matrices must be equal for multiplication, the products cannot be computed properly.
+
+\newpage
+
+8.	The probability distribution of a random variable X is given below. Determine the mean of this random variable.
+```{r}
+x <- seq(from = 0, to =8, by=1)
+sampx <- sample(x, size = 10000, replace = T, prob = c(0.10011,0.26697,0.31146, 0.20764, 0.08652, 0.02307, 0.00385, 0.00037, 0.00002))
+mean <- mean(sampx)
+mean
+```
+

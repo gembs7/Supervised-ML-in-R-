@@ -1,0 +1,128 @@
+---
+title: "Lab 9"
+author: "Nick Gembs"
+date: "11/9/20"
+output:
+  word_document: default
+  html_document: default
+subtitle: Section 404
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+Leaves2020 Report
+
+```{r, echo = T, eval= T, fig.height= 1 , fig.width=1 , out.height=1 , out.width=1}
+
+Leaves2020 <- read.csv("C:/Users/Nick/Downloads/Leaves2020 (1).csv", stringsAsFactors = F)
+
+Leaves2020$quad[Leaves2020$quad =="ART"] = "ARTS"
+n <- length(Leaves2020$quad)
+```
+
+### *Purpose*
+
+In late October, 2020, two samples of leaves were taken from the Arts Quad and the Agriculture Quad of Cornell University. **297** leaves were taken from the arts quad and **269** were taken from the ag quad, for a total of **`r n`** leaves. The purpose of this sampling was to answer the following questions:
+
+  * Is there a difference in leaf size by quad?
+  * Which quad has bigger leaves?
+  * How large is the aforementioned size difference?
+  * Are there different types of leaves in each quad?
+  
+### *Procedure*
+
+In order to answer these questions, we need to sort the data gathered from the leaves by **length** and **type of leaf**.
+
+### Leaf Length Definition
+
+We defined the **length of a leaf** to be the length of the straigtened stem plus the length of the longest vien that extends from the stem of the leaf. In a case where the leaf was damaged, the portions of the previous credentials that still existed were measured. All leaves were removed from trees or branches before the measuring process began. Since a stem is usually curved, it may have been necessary to pivot the ruler as the measurement was being made. All measurements we made to the nearest millimeter.
+
+```{r, echo = T, eval = T}
+Leaves2020$shape <- ifelse(Leaves2020$shape == "T", T, F)
+Leaves2020$quad <- ifelse(Leaves2020$quad == "ARTS", T, F)
+```
+
+### Leaf Type Definition
+
+In this sample, the **Leaf Type** was determined to either be generally teardrop shaped or not teardrop shaped. The shape was assumed to be the type of leaf. IF a leaf was teardrop shaped, it was recorded as T, otherwise it was recorded as NT. These data values were changed into T (*True*) for teardrop shapes and F (*False*) for not. For those leaves that were damages, it was usually apparent what the intact leaf would have looked like. This shape was what we used to determine the type that was recorded.
+
+
+### Data Collection
+
+In order to choose our selected leaves, we would simulate a simple random sample. First, we found maps of both Cornell quads and bounded their outer regions. An *x* and *y* axis was placed on top of the map, with the origin in one corner. Units on this newly created scale were pixels of the original map. The random sample consisted of the choice of a random *x* value and *y* value within the bounds of the map. This *x,y* coordinate marked the location at which the leaf would be taken from in either quad.This process was repeated a number of times to gather a series of coordinates that each student would have to go to, in order to collect leaf data.
+
+The more coordinate points we used, the more accurate our data would have been, but the more time it would have taken to gather and process that data.
+
+
+### *Analysis*
+
+```{r, echo = F, eval = T, fig.height= 6 , fig.width=4 , out.height=300 , out.width=200}
+par(mfrow = c(1,3))
+summary(Leaves2020$length)
+summary(Leaves2020$shape)
+summary(Leaves2020$quad)
+```
+
+In order to decipher any differences in leaf size by quad, we must graph our data to interperet and visualize in
+
+```{r,  echo = T, eval = T, fig.height= 6 , fig.width=8 , out.height=300 , out.width=400}
+par(mfrow = c(1, 2))
+hist(Leaves2020$length[Leaves2020$quad == T], main = "Arts Quad", xlab = "Length (cm)")
+hist(Leaves2020$length[Leaves2020$quad == F], main = "Ag Quad", xlab = "Length (cm)")
+
+```
+ 
+ We can gather several observations from these histograms. First, both histograms look approximately bell shaped (*normal distribution*) with a slight skew to the right. Also, the mean of the Ag quad seems to be slightly higher. This could, however, be due to error in a small sample size. In order to get more precise measurements from these histograms, we increased the bin size.
+ 
+```{r,  echo = T, eval = T, fig.height= 6 , fig.width=8 , out.height=300 , out.width=400}
+
+par(mfrow = c(1, 2))
+hist(Leaves2020$length[Leaves2020$quad == T], main = "Arts Quad", xlab = "Length (cm)", breaks = 20)
+hist(Leaves2020$length[Leaves2020$quad == F], main = "Ag Quad", xlab = "Length (cm)", breaks = 20)
+
+
+```
+
+With smaller bins, we can more clearly observe the right skew of the histograms However, this histogram does not suggest a clear difference in means of the two data sets.
+
+These trends can be further understood visually with a **Q-Q Plot** of the data.
+
+```{r, echo = T, eval = T, fig.height= 5 , fig.width=7 , out.height=300 , out.width=400}
+
+qqplot(Leaves2020$length[Leaves2020$quad == T], Leaves2020$length[Leaves2020$quad == F], 
+    xlab = "ARTS QUAD", ylab = "AG QUAD")
+abline(0, 1, col = "red")
+```
+
+The Q-Q plot shows a very slight curved pattern, but this curve in negligible when weighed against potential error from a small sample size. Also, with most of the data points falling below the red *y=x* line, it can be hypothesized that there is a linear transformation. The Q-Q plot suggests larger leaf lengths in the Arts Quad than in the Ag quad, but once again, this could be due to the sample size.
+
+A **boxplot** of the data can further illustrate our finding through an image representation of our five number summary:
+
+```{r, echo = T, eval = T, fig.height= 3 , fig.width=4 , out.height=300 , out.width=400}
+
+boxplot(length ~ quad, data = Leaves2020, horizontal = TRUE, main = "", names = c("Ag", "Arts"), ylab = "QUAD", xlab = " Lengths of Leaves", col = c("blue", "green"))
+
+
+```
+
+The right skew and lower mean of the Ag Quad can be most easily seen in this box plot of the two data sets.
+
+We can hypothesize that leaves in the Ag quad are shorter than leaves in the Arts quad. This is a potential answer to our first question. We cannot answer the question, "Are there different types of leaves in each quad?" as we do not yet have a numerical or graphical way to represent this data.
+
+### *Conlusion*
+
+After experimentation, it seems reasonable, but not definitively so, to say that the distributions of the lengths of leaves may differ. It may be that this difference is only in the location of the distribution, as leaves in the Ag quad tend to be smaller than in the Arts quad. However, there are indications that there is a difference in shape also. These differences in data could be due to real differences in leaf sizes/shapes, or just error from a small sample size.
+
+As to the the parts of these questions, we need further tools to assist us in our analysis.
+
+### *Future Research*
+
+Once we are able to numerically and graphically interpret True/False data from leaf shape, we can explore the questions more thoroughly. However, this data cannot be used to make any definitive conclusions until we increase the sample size. Also, due to the fact that students were choosing the leaves, there could have been some human bias in leaf choice. In a future experiment, a more random sampling method will have to be implemented. These sources of error raise new questions:
+
+  *Do samplers tend to select larger leaves?
+  
+  *Do samplers prefer certain shapes of leaves?

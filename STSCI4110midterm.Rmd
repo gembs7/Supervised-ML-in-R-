@@ -1,0 +1,472 @@
+---
+title: "STSCI4110 MIDTERM"
+author: "Nick Gembs"
+date: "11/9/2022"
+output:
+  word_document: default
+  html_document: default
+---
+```{r}
+df = read.csv("C:/Users/Nick/Downloads/policing2.csv")
+```
+
+
+```{r, eval = FALSE}
+df
+```
+
+```{r}
+df = df[(df$race == "White") | (df$race == "Black"),]
+df = df[(df$sex == "Male") | (df$sex == "Female"),]
+df = df[(df$held == 0) | (df$held == 1),]
+df = df[(df$employed == "Yes") | (df$employed == "No"),]
+df = df[(df$citizen == "Yes") | (df$citizen == "No"),]
+df = df[(df$prior.traffic == 0) | (df$prior.traffic == 1)| (df$prior.traffic == 2),]
+df = df[(df$year > 2000) & (df$year < 2007),]
+df = df[(df$databases > -1) & (df$databases < 7),]
+df = df[(df$age > 3) & (df$age < 110),]
+df = df[(df$region == "North") | (df$region == "South")| (df$region == "East")| (df$region == "West"),]
+
+```
+
+
+```{r}
+
+heldbinary = df$held
+df = cbind(df, heldbinary)
+
+for(i in 1:length(df$held)){
+  if(df$held[i]==1){
+    df$held[i] = "harsh"
+  } else {
+    df$held[i] = "lenient"
+  }
+}
+```
+
+```{r}
+```
+
+
+
+```{r}
+#Descriptive Stats Numeric
+#Numeric = prior.traffic, databases, age, year
+
+#min
+
+minprior.traffic = min(df$prior.traffic)
+minprior.traffic
+mindatabases = min(df$databases)
+mindatabases
+minyear = min(df$year)
+minyear
+minage = min(df$age)
+minage
+
+#max
+
+maxprior.traffic = max(df$prior.traffic)
+maxprior.traffic
+maxdatabases = max(df$databases)
+maxdatabases
+maxyear = max(df$year)
+maxyear
+maxage = max(df$age)
+maxage
+
+#median
+
+medianprior.traffic = median(df$prior.traffic)
+medianprior.traffic
+mediandatabases = median(df$databases)
+mediandatabases
+medianyear = median(df$year)
+medianyear
+medianage = median(df$age)
+medianage
+
+#min
+
+sdprior.traffic = sd(df$prior.traffic)
+sdprior.traffic
+sddatabases = sd(df$databases)
+sddatabases
+sdyear = sd(df$year)
+sdyear
+sdage = sd(df$age)
+sdage
+```
+```{r}
+min = c(minage,mindatabases,minprior.traffic,minyear)
+max = c(maxage,maxdatabases,maxprior.traffic,maxyear)
+median = c(medianage,mediandatabases,medianprior.traffic,medianyear)
+Standard.Dev = c(sdage,sddatabases,sdprior.traffic,sdyear)
+
+numerics = data.frame(min,max,median,Standard.Dev)
+row.names(numerics) = c("Age", "Databases", "Prior Traffic", "Year")
+numerics
+```
+
+
+
+```{r}
+# Descriptive Statistics: Categorical
+# Categorical: Outcome(held), race, sex, prior.traffic, region, employed, citizen, databases
+
+# held
+harsh = length(df[df$heldbinary == 1,]$held)/length(df$held)
+harsh
+lenient = 1-harsh
+lenient
+
+held = data.frame(harsh,lenient, row.names = "held")
+held
+
+# race
+
+black = length(df[df$race == "Black",]$race)/length(df$race)
+black
+white = 1-black
+white
+
+race = data.frame(black,white, row.names = "race")
+race
+
+# sex
+
+Male = length(df[df$sex == "Male",]$sex)/length(df$sex)
+Male
+Female = 1-Male
+Female
+
+sex = data.frame(Male,Female, row.names = "sex")
+sex
+
+# Citizen
+
+Citizen = length(df[df$citizen == "Yes",]$citizen)/length(df$citizen)
+Citizen
+NonCitizen = 1-Citizen
+NonCitizen
+
+Citizenship = data.frame(Citizen,NonCitizen, row.names = "Citizenship")
+Citizenship
+
+# Employed
+
+Employed = length(df[df$employed == "Yes",]$employed)/length(df$employed)
+Employed
+Unemployed = 1-Employed
+Unemployed
+
+Employment = data.frame(Employed,Unemployed, row.names = "Employment")
+Employment
+
+# Region
+
+North = length(df[df$region == "North",]$region)/length(df$region)
+North
+South = length(df[df$region == "South",]$region)/length(df$region)
+South
+East = length(df[df$region == "East",]$region)/length(df$region)
+East
+West = length(df[df$region == "West",]$region)/length(df$region)
+West
+
+Region = data.frame(North,South,East,West, row.names = "Region")
+
+# Prior.traffic
+
+pt0 = length(df[df$prior.traffic == 0,]$prior.traffic)/length(df$prior.traffic)
+pt0
+pt1 = length(df[df$prior.traffic == 1,]$prior.traffic)/length(df$prior.traffic)
+pt1
+pt2 = 1-(pt1+pt0)
+pt2
+
+
+Prior.Traffic = data.frame(pt0,pt1,pt2 )
+colnames(Prior.Traffic) = (c("No Prior Violations", "1 Prior Violation", "2 or more Prior Violations"))
+Prior.Traffic
+
+# Databases
+
+db0 = length(df[df$databases == 0,]$databases)/length(df$databases)
+db0
+db1 = length(df[df$databases == 1,]$databases)/length(df$databases)
+db1
+db2 = length(df[df$databases == 2,]$databases)/length(df$databases)
+db2
+db3 = length(df[df$databases == 3,]$databases)/length(df$databases)
+db3
+db4 = length(df[df$databases == 4,]$databases)/length(df$databases)
+db4
+db5 = length(df[df$databases == 5,]$databases)/length(df$databases)
+db5
+db6 = length(df[df$databases == 6,]$databases)/length(df$databases)
+db6
+
+Databases = data.frame(db0,db1,db2,db3,db4,db5,db6, row.names = "Databases")
+colnames(Databases) = c("0","1","2","3","4","5","6")
+Databases
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+
+
+mat = table(df$held, df$sex)
+
+mat
+
+bl = mat[1,1] + mat[2,1]
+br = mat[1,2] + mat[2,2]
+rt = mat[1,1] + mat[1,2]
+rb = mat[2,1] + mat[2,2]
+total = mat[2,1] + mat[2,2]+mat[1,1] + mat[1,2]
+
+expected1 = (bl*rt)/total
+expected1
+expected2 = (bl*rb)/total
+expected2
+expected3 = (rt*br)/total
+expected3
+expected4 = (rb*br)/total
+expected4
+
+cat("All expected counts greater than 5")
+
+#par(las=1)
+spineplot(t(mat), col = c("blue","red"), main = ("Relationship between punishment level and sex"), xlab = "sex", ylab = "punishment")
+
+chisq.test(mat, correct = FALSE)
+
+```
+
+
+```{r}
+mat = table(df$held, df$race)
+
+mat
+
+bl = mat[1,1] + mat[2,1]
+br = mat[1,2] + mat[2,2]
+rt = mat[1,1] + mat[1,2]
+rb = mat[2,1] + mat[2,2]
+total = mat[2,1] + mat[2,2]+mat[1,1] + mat[1,2]
+
+expected1 = (bl*rt)/total
+expected1
+expected2 = (bl*rb)/total
+expected2
+expected3 = (rt*br)/total
+expected3
+expected4 = (rb*br)/total
+expected4
+
+cat("All expected counts greater than 5")
+
+#par(las=1)
+spineplot(t(mat), col = c("blue","red"), main = ("Relationship between punishment level and race"), xlab = "race", ylab = "punishment")
+
+chisq.test(mat, correct = FALSE)
+```
+
+
+
+```{r}
+mat = table(df$held, df$employed)
+
+mat
+
+bl = mat[1,1] + mat[2,1]
+br = mat[1,2] + mat[2,2]
+rt = mat[1,1] + mat[1,2]
+rb = mat[2,1] + mat[2,2]
+total = mat[2,1] + mat[2,2]+mat[1,1] + mat[1,2]
+
+expected1 = (bl*rt)/total
+expected1
+expected2 = (bl*rb)/total
+expected2
+expected3 = (rt*br)/total
+expected3
+expected4 = (rb*br)/total
+expected4
+
+cat("All expected counts greater than 5")
+
+#par(las=1)
+spineplot(t(mat), col = c("blue","red"), main = ("Relationship between punishment level and employment"), xlab = "employed", ylab = "punishment")
+
+chisq.test(mat, correct = FALSE)
+```
+
+
+```{r}
+mat = table(df$held, df$citizen)
+
+mat
+
+bl = mat[1,1] + mat[2,1]
+br = mat[1,2] + mat[2,2]
+rt = mat[1,1] + mat[1,2]
+rb = mat[2,1] + mat[2,2]
+total = mat[2,1] + mat[2,2]+mat[1,1] + mat[1,2]
+
+expected1 = (bl*rt)/total
+expected1
+expected2 = (bl*rb)/total
+expected2
+expected3 = (rt*br)/total
+expected3
+expected4 = (rb*br)/total
+expected4
+
+cat("All expected counts greater than 5")
+
+#par(las=1)
+spineplot(t(mat), col = c("blue","red"), main = ("Relationship between punishment level and citizenship"), xlab = "citizen", ylab = "punishment")
+
+chisq.test(mat, correct = FALSE)
+```
+
+
+
+```{r}
+mat = table(df$held, df$region)
+
+mat
+
+bl = mat[1,1] + mat[2,1]
+br = mat[1,2] + mat[2,2]
+rt = mat[1,1] + mat[1,2] + mat[1,3] + mat[1,4]
+rb = mat[2,1] + mat[2,2] + mat[2,3] + mat[2,4]
+bl1 = mat[1,3] + mat[2,3]
+br1 = mat[1,4] + mat[2,4]
+
+total = mat[2,1] + mat[2,2]+mat[1,1] + mat[1,2] + mat[1,3] + mat[2,3] +mat[1,4] + mat[2,4]
+
+expected1 = (bl*rt)/total
+expected1
+expected2 = (bl*rb)/total
+expected2
+expected3 = (br*rt)/total
+expected3
+expected4 = (br*rb)/total
+expected4
+expected5 = (bl1*rt)/total
+expected5
+expected6 = (bl1*rb)/total
+expected6
+expected7 = (br1*rt)/total
+expected7
+expected8 = (br1*rb)/total
+expected8
+
+
+cat("All expected counts greater than 5")
+
+#par(las=1)
+spineplot(t(mat), col = c("blue","red"), main = ("Relationship between punishment level and region"), xlab = "region", ylab = "punishment")
+
+chisq.test(mat, correct = FALSE)
+```
+
+
+```{r}
+mat = table(df$held, df$prior.traffic)
+
+mat
+
+bl = mat[1,1] + mat[2,1]
+br = mat[1,2] + mat[2,2]
+rt = mat[1,1] + mat[1,2] + mat[1,3] 
+rb = mat[2,1] + mat[2,2] + mat[2,3] 
+bl1 = mat[1,3] + mat[2,3]
+
+total = mat[2,1] + mat[2,2]+mat[1,1] + mat[1,2]+mat[1,3] + mat[2,3]
+
+expected1 = (bl*rt)/total
+expected1
+expected2 = (bl*rb)/total
+expected2
+expected3 = (br*rt)/total
+expected3
+expected4 = (br*rb)/total
+expected4
+expected5 = (bl1*rt)/total
+expected5
+expected6 = (bl1*rb)/total
+expected6
+
+cat("All expected counts greater than 5")
+
+#(las=1)
+spineplot(t(mat), col = c("blue","red"), main = ("Relationship between punishment level and prior traffic violations"), xlab = "prior traffic", ylab = "punishment")
+
+
+library("vcdExtra")
+CMHtest(mat)
+```
+
+```{r}
+mat = table(df$held, df$databases)
+
+mat
+
+
+#par(las=1)
+spineplot(t(mat), col = c("blue","red"), main = ("Relationship between punishment level and databases"), xlab = "databases", ylab = "punishment")
+
+
+
+CMHtest(mat)
+```
+
+```{r}
+mat = table(df$held, df$year)
+
+mat
+
+spineplot(t(mat), col = c("blue","red"), main = ("Relationship between punishment level and year"), xlab = "year", ylab = "punishment")
+
+CMHtest(mat)
+
+lm.fit = glm(df$heldbinary~df$year, family = "binomial")
+summary(lm.fit)
+```
+
+
+```{r}
+mat = table(df$held, df$age)
+
+mat
+
+
+
+CMHtest(mat)
+
+lm.fit = glm(df$heldbinary~df$age, family = "binomial")
+summary(lm.fit)
+```
+
+
+
+
+
+
+

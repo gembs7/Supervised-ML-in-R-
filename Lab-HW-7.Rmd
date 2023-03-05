@@ -1,0 +1,660 @@
+---
+title: "Lab-HW-7"
+author: "Nick Gembs"
+date: "3/26/2021"
+output: word_document
+---
+
+
+
+## TA Example - Performing Multiple Tests
+
+```{r}
+
+#Use 2 predictors, perform a test on each. Determine if each resulted in a correct decision. Determine if BOTH resulted in a correct decision 
+
+sig.level <- 0.05
+
+#two sided test beta1 = 0 vs beta1 != 0
+
+beta1 <- 0
+beta2 <- 0
+
+#generate first predictor
+
+nx <- 20
+times <- 3
+X1 <- rep(1:nx, times)
+
+#select a different set of values for our second predictor, same amount of values
+
+sz <- nx*times
+X2 <- sample(1:40, size = sz, replace = T)
+
+#generate our responses, with rnorm error
+Y <- beta1*X1 +beta2*X2 + rnorm(sz, 0, 1)
+
+dat <- data.frame(Y,X1,X2)
+
+
+#fit our model & store results
+
+lm.fit <- lm(Y~ X1+X2, data=dat)
+summary.fit <- summary(lm.fit)
+summary.fit
+
+
+#extract p-values from the summary, coefficients command
+coefficients(summary.fit)
+pval <- coefficients(summary.fit)[2:3,4]
+
+#compare p-values to our significance level
+
+decisions <- ifelse(pval>sig.level, 1, 0)
+decisions
+
+#determine if both predictors are correct by taking the product of the decisions
+
+prod.decisions <- prod(decisions)
+
+#store results
+
+store.results <- c(decisions, prod.decisions)
+store.results
+
+#simulate performing these tests 10000 times
+
+sig.level <- 0.05
+
+#two sided test beta1 = 0 vs beta1 != 0
+
+beta1 <- 0
+beta2 <- 0
+
+#generate first predictor
+
+nx <- 20
+times <- 3
+X1 <- rep(1:nx, times)
+
+#select a different set of values for our second predictor, same amount of values
+
+sz <- nx*times
+X2 <- sample(1:40, size = sz, replace = T)
+
+num.sims <- 10000
+
+store.results <- matrix(NA, ncol = 3, nrow = num.sims)
+
+for(i in 1:num.sims) {
+  #generate our responses, with rnorm error
+  Y <- beta1*X1 +beta2*X2 + rnorm(sz, 0, 1)
+
+  dat <- data.frame(Y,X1,X2)
+
+
+  #fit our model & store results
+
+  lm.fit <- lm(Y~ X1+X2, data=dat)
+  summary.fit <- summary(lm.fit)
+  
+
+
+  #extract p-values from the summary, coefficients command
+  coefficients(summary.fit)
+  pval <- coefficients(summary.fit)[2:3,4]
+
+  #compare p-values to our significance level
+
+  decisions <- ifelse(pval>sig.level, 1, 0)
+
+
+  #determine if both predictors are correct by taking the product of the decisions
+
+  prod.decisions <- prod(decisions)
+
+  #store results
+
+  store.results[i, 1:3] <- c(decisions, prod.decisions)
+
+}
+
+#compute the proportion of each column
+listen.carefully <- apply(store.results, MARGIN = 2, FUN = mean)
+listen.carefully
+```
+
+\newpage
+
+Problem #2: Repeat the previous exercise with 10 predictor variables. Use a signifigance level of 0.05 for each individual test. Report,outside of a code chunk, what the fifth, seventh, and last values in the listen.carefully vector represent. Report them, using inline code, as percentages. ( Additionally, paste this report into a code chunk. Set the options to echo=TRUE, eval=FALSE)
+
+```{r}
+
+#Use 2 predictors, perform a test on each. Determine if each resulted in a correct decision. Determine if BOTH resulted in a correct decision 
+
+sig.level <- 0.05
+
+#two sided test beta1 = 0 vs beta1 != 0
+
+beta1 <- 0
+beta2 <- 0
+beta3 <- 0
+beta4 <- 0
+beta5 <- 0
+beta6 <- 0
+beta7 <- 0
+beta8 <- 0
+beta9 <- 0
+beta10 <- 0
+
+#generate first predictor
+
+nx <- 20
+times <- 3
+X1 <- rep(1:nx, times)
+
+#select a different set of values for our second predictor, same amount of values
+
+sz <- nx*times
+X2 <- sample(1:40, size = sz, replace = T)
+X3 <- sample(1:40, size = sz, replace = T)
+X4 <- sample(1:40, size = sz, replace = T)
+X5 <- sample(1:40, size = sz, replace = T)
+X6 <- sample(1:40, size = sz, replace = T)
+X7 <- sample(1:40, size = sz, replace = T)
+X8 <- sample(1:40, size = sz, replace = T)
+X9 <- sample(1:40, size = sz, replace = T)
+X10 <- sample(1:40, size = sz, replace = T)
+
+#generate our responses, with rnorm error
+Y <- beta1*X1 +beta2*X2 + beta3*X3 + beta4*X4 + beta5*X5 + beta6*X6 + beta7*X7 + beta8*X8 + beta9*X9 + beta10*X10 + rnorm(sz, 0, 1)
+
+dat <- data.frame(Y,X1,X2,X3,X4,X5,X6,X7,X8,X9,X10)
+
+
+#fit our model & store results
+
+lm.fit <- lm(Y~ X1+X2+X3+X4+X5+X6+X7+X8+X9+X10, data=dat)
+summary.fit <- summary(lm.fit)
+summary.fit
+
+
+#extract p-values from the summary, coefficients command
+coefficients(summary.fit)
+pval <- coefficients(summary.fit)[2:11,4]
+
+#compare p-values to our significance level
+
+decisions <- ifelse(pval>sig.level, 1, 0)
+decisions
+
+#determine if both predictors are correct by taking the product of the decisions
+
+prod.decisions <- prod(decisions)
+
+#store results
+
+store.results <- c(decisions, prod.decisions)
+store.results
+
+#simulate performing these tests 10000 times
+
+sig.level <- 0.05
+
+#two sided test beta1 = 0 vs beta1 != 0
+
+beta1 <- 0
+beta2 <- 0
+beta3 <- 0
+beta4 <- 0
+beta5 <- 0
+beta6 <- 0
+beta7 <- 0
+beta8 <- 0
+beta9 <- 0
+beta10 <- 0
+
+#generate first predictor
+
+nx <- 20
+times <- 3
+X1 <- rep(1:nx, times)
+
+#select a different set of values for our second predictor, same amount of values
+
+sz <- nx*times
+X2 <- sample(1:40, size = sz, replace = T)
+X3 <- sample(1:40, size = sz, replace = T)
+X4 <- sample(1:40, size = sz, replace = T)
+X5 <- sample(1:40, size = sz, replace = T)
+X6 <- sample(1:40, size = sz, replace = T)
+X7 <- sample(1:40, size = sz, replace = T)
+X8 <- sample(1:40, size = sz, replace = T)
+X9 <- sample(1:40, size = sz, replace = T)
+X10 <- sample(1:40, size = sz, replace = T)
+
+num.sims <- 10000
+
+store.results <- matrix(NA, ncol = 11, nrow = num.sims)
+
+for(i in 1:num.sims) {
+  #generate our responses, with rnorm error
+  Y <- beta1*X1 +beta2*X2 + beta3*X3 + beta4*X4 + beta5*X5 + beta6*X6 + beta7*X7 + beta8*X8 + beta9*X9 + beta10*X10 + rnorm(sz, 0, 1)
+
+  dat <- data.frame(Y,X1,X2,X3,X4,X5,X6,X7,X8,X9,X10)
+
+
+  #fit our model & store results
+
+  lm.fit <- lm(Y~ X1+X2+X3+X4+X5+X6+X7+X8+X9+X10, data=dat)
+  summary.fit <- summary(lm.fit)
+  
+
+
+  #extract p-values from the summary, coefficients command
+  pval <- coefficients(summary.fit)[2:11,4]
+
+  #compare p-values to our significance level
+
+  decisions <- ifelse(pval>sig.level, 1, 0)
+
+
+  #determine if both predictors are correct by taking the product of the decisions
+
+  prod.decisions <- prod(decisions)
+
+  #store results
+
+  store.results[i, 1:11] <- c(decisions, prod.decisions)
+
+}
+
+#compute the proportion of each column
+listen.carefully <- apply(store.results, MARGIN = 2, FUN = mean)
+listen.carefully
+```
+The fifth value of liste.carefully is `r listen.carefully[5]*100`%
+The seventh value of liste.carefully is `r listen.carefully[7]*100`%
+The last value of liste.carefully is `r listen.carefully[11]*100`%
+
+\newpage
+
+The results of a small-experiment of the relation between degree of brand recognition Y, tastiness X_1, and goodness X_2 of types of a round chocolate cookie sandwich are contained in the Brand.csv file. (K)
+```{r}
+par(mfrow = c(1,2))
+#a.	Obtain a scatterplot matrix of the dataset. Are there any apparent linear relationships between the variables? Describe.Are there any apparent nonlinear relationships between the variables? Describe.Are there any odd looking graphs? Explain. Why might they look that way.(You might want to examine the data.)
+
+Brand <- read.csv("C:/Users/Nick/Downloads/Brand (1).csv")
+
+pairs(~ recognition+tastiness+goodness, data=Brand)
+
+paste("There appears to be a positive linear trend between regocnition and tastiness. The relationships between tastiness/goodness and recognition/goodness appear in an odd manner on the graph as goodness only consists of a repeating vector of the numbers 2 and 4. There could possibly be a relationship between recognition and goodness as it seems that more of the 4s have a higher recognition, but this is difficult to discern given the nature of the graph and the low varibaility of responses in the goodness score.")
+
+#b.	Obtain the correlation matrix. Does it give any indications of a relatively strong ( >.5) linear relationship between any of the variables? Does this agree with what you visually documented in the previous part.
+
+cor(Brand)
+paste(" There are indications of a relatively strong ( >.5) linear relationship between recognition and tastiness. This data agrees with the interpretations of the scatterplots in the previous part.")
+
+#c.	Fit a regression model to the data. State the estimated regression function.
+
+lm.fit <- lm(recognition ~ tastiness+goodness, data=Brand)
+summary(lm.fit)
+
+paste("The regression function for the fitted model is equal to Y = 37.65 + 4.4250*X1 + 4.3750*X2 where Y reresents the recognition score, X1 represents the tastiness score, and X2 represents the goodness score.")
+
+#d.	What do residuals represent? What can they estimate? Create a histogram of the residuals. Hypothesis the distribution of the residuals. Create a qqplot comparing the residuals to this hypothesized distribution.
+
+Residuals <- lm.fit$residuals
+hist(Residuals)
+
+paste("The residuals represent the distance the observed values are from the fitted values of the regression function. Residuals can be used to estimate average error/variance of a dataset fitted to a function. The residuals appear to be normally distributed with a mean of 0 and a standard deviation of approximately 2.")
+
+dist <- rnorm(16, mean = 0, sd = 2)
+qqplot(dist, Residuals)
+
+#e.	Do either the the predictors appear to be useful in modeling/explaining/describing the response? Explain.
+
+paste("The predictors do appear to be useful in modeling the response as the residuals display a generally normal distribution with low variance. This indicates that the observed values are equally spread around and near the regression function. This result is supported with the linear appearance of the qqplot.")
+
+#f.	Suppose a new type of round chocolate cookie sandwich is going to be sold. It has a goodness score of 3 and a tastiness score of 7. With 99% confidence, what would you predict the average recognition score would be for this new cookie?
+
+n <- data.frame(tastiness = c(7), goodness = c(3))
+predict(lm.fit, newdata = n, interval = "prediction", level = 0.99, se.fit = T)
+
+paste(" The average recognition score for this new cookie would have a mean of 81.75, a lower bound of 73.38736, and an upper bound of 90.11264")
+
+```
+\newpage
+
+Problem #4: A large grocery store chain tracks its costs. Data for a single distribution hub are collect at the end of each week for a year. The data is held in grocery.csv. The variables are the number of pallets shipped each week, indirect costs given as a percentage, an indicator variable that is coded as as 1 for weeks with a holiday, and the total number of labor hours. The data is recorded in the order in which it was collected. (K)
+```{r}
+grocery <- read.csv("C:/Users/Nick/Downloads/grocery (1).csv")
+
+#a.	Make a boxplot of each variable, excluding holiday. Do any look to have any outlying values?
+par(mfrow = c(1,3))
+
+boxplot(grocery$labor, main = "Labor")
+boxplot(grocery$pallets, main = "Pallets")
+boxplot(grocery$indirect, main = "Indirect")
+
+paste(" Labor and pallets have outliers above the mean while Indirect has an outlier below the mean. ")
+
+#b.	Create a histogram of each variable, excluding holiday.
+
+par(mfrow = c(1,3))
+hist(grocery$labor, main = "Labor")
+hist(grocery$pallets, main = "Pallets")
+hist(grocery$indirect, main = "Indirect")
+
+#c.	Plot each variable against its week number. Do you notice any trends and/or patterns?
+
+week <- c(1:52)
+
+par(mfrow = c(1,4))
+plot(week,grocery$labor, main = "Labor")
+plot(week,grocery$pallets, main = "Pallets")
+plot(week,grocery$indirect, main = "Indirect")
+plot(week,grocery$holiday, main = "holiday")
+
+#d.	Obtain a scatterplot matrix of the dataset. Are there any apparent linear relationships between the variables? Describe. Are there any apparent nonlinear relationships between the variables? Describe.Are there any odd looking graphs? Explain. Why might they look that way.(You might want to examine the data.)
+
+pairs(~ labor+pallets+indirect+holiday, data=grocery)
+
+paste(" There does not appear to be any apparent linear trends between the variables. There may possibly be some relationship between labor and if there is a holiday. There are odd looking graphs in all of the boxes that include holiday because holiday is a binary variable with only 0 and 1 as responses.")
+
+#e.	Fit a regression model to the data. State the estimated regression function. What do the coefficients represent?
+
+lm.fit <- lm(labor ~ pallets+indirect+holiday, data=grocery)
+summary(lm.fit)
+
+paste("The estimated regression fucntion for the set is Y = 4.150e+03 + 7.871e-04*X1 + 6118.07*X2 - 64425.21*X3, where Y is the labor cost, X1 is the number of pallets shipped, X2 is the indirect costs, and X3 is whether or not there was a holiday. b0 = 4.150e+03 which is the labor cost at 0 of every variable. b1=7.871e-04 which is the labor cost per additional pallet shipped. b2=-1.317e+01 which represents the labor cost per additional unit increase in indirect costs. b3=6.236e+02 which is the additional laborcost if there was a holiday in the given week.")
+
+
+#f.	Create a histogram of the residuals. Hypothesis the distribution of the residuals. Create a qqplot comparing the residuals to this hypothesized distribution. Create a boxplot of the residuals. What can you infer about the residuals from these graphs?
+
+par(mfrow = c(1,3))
+Residuals <- lm.fit$residuals
+hist(Residuals)
+boxplot(Residuals)
+dist <- rnorm(16, mean = 0, sd = 50000)
+qqplot(dist, Residuals)
+
+paste("The residuals appear to be approximately normally distributed with a few extra values towards the higher end, skewing the mean higher and making the linear approximation slightly innacurate. However, the residual distrbution is still mainly normal and the qqplot is close to a linear trend.")
+
+#g.	Next week is a holiday week. In past years, during that week, indirect costs were about 5.2 on average and around 320078 pallets are shipped. With 90% confidence, predict the labor cost.
+
+
+n <- data.frame(indirect = c(5.2), pallets = c(320078), holiday = c(1))
+predict(lm.fit, newdata = n, interval = "prediction", level = 0.90, se.fit = T)
+
+paste("The labor cost at these vaues is predicted to be 4956.906 with a lower bound of 4680.36 and an upper bound of 5233.451.")
+
+```
+
+\newpage
+
+5) Confidence Intervals
+```{r}
+
+#a.	What does What does it mean for a confidence interval to correctly estimate the the mean?
+
+paste("If a confidence interval correctly estimates the mean, the average value of the response at the specified predictor is within the range of values given by the lower and upper bounds of the confidence interval.")
+
+#b.	Generate 100 numbers from a normal distribution. You should select the mean and the standard deviation. State what you chose for each. Use the t.test function to create a 70% confidence interval for the mean. Report whether the confidence interval correctly estimated the mean?
+
+paste("mean = 50, sd = 5")
+sample <- rnorm(100, 50, 5)
+t <- t.test(sample, conf.level = .7)
+t
+
+ifelse(t$conf.int[1] < 50 && 50 <  t$conf.int[2], paste("The confidence interval correctly estimated the mean"), paste("The confidence interval did not correctly estimate the mean"))
+
+#c.	Repeat the previous part 20 more times. Report the result for each repitition.
+
+sum <- 0
+repeat {
+  sum = sum+1
+  sample <- rnorm(100, 50, 5)
+  t <- t.test(sample, conf.level = .7)
+  
+
+
+  ifelse(t$conf.int[1] < 50 && 50 <  t$conf.int[2], x <- c("The confidence interval correctly estimated the mean"), x <- c("The confidence interval did not correctly estimate the mean"))
+  print(x)
+  
+  if (sum == 20) {
+    break
+  }
+}
+#d.	The is a new situation. Suppose you are told (4,5) is a 95% confidence interval for the mean of a population. Is it possible that the mean of the population is 6? Why or why not? ( Not the population that you collected simulated data from. Assume that the data collection process was flawless and all assumptions for computing such an interval were met perfectly.)
+
+paste(" The mean of the population can still be 6, although it is extremely unlikely. Since the confidence interval is only 95% and not 100%, the actual mean can fall outside of the given confidence interval. Given this, it is still unreasonable to predict that 6 is a possible mean for this set as the confidence interval is relatively high (95%) and the number 6 is well outside the given range (4,5)")
+
+```
+
+\newpage
+
+Problem #6: The Loblolly data frame has 84 rows and 3 columns of records of the growth of Loblolly pine trees. You can access it just by typing in Loblolly. It is preloaded, even though you don’t see it in the environment. It contains three variables height, age, seed. We will be interested in just height(ft) and age(years).
+
+```{r}
+lob <- Loblolly
+
+#a.	How many times does each unique age appear in the dataset? How many unique ages are there, and what are they?
+
+uage <- unique(lob$age)
+length <- length(uage)
+
+paste("There are",length, "unique age values. They are: 3,5,10,15,20,25.")
+
+#b.	What is the mean height, and standard deviation, at each age?
+
+height3 <- subset(lob, age ==3)
+m1 <- mean(height3$height)
+m1
+sd(height3$height)
+
+height5 <- subset(lob, age ==5)
+m2 <- mean(height5$height)
+m2
+sd(height5$height)
+
+height10 <- subset(lob, age ==10)
+m3 <- mean(height10$height)
+m3
+sd(height10$height)
+
+height15 <- subset(lob, age ==15)
+m4 <- mean(height15$height)
+m4
+sd(height15$height)
+
+height20 <- subset(lob, age ==20)
+m5 <- mean(height20$height)
+m5
+sd(height20$height)
+
+height25 <- subset(lob, age ==25)
+m6 <- mean(height25$height)
+m6
+sd(height25$height)
+
+#c.	Construct a single graph with the following: (1) Age(X) vs Height(Y) (2) Mean height at each age against its age. (3) least squares regression linw. Use the code chunk options to make sure the graph is readable. Chance the size of the pointa, the shape of the points, and/or the color of the points to make it readable.
+
+plot( lob$age, lob$height)
+points(c(3,5,10,15,20,25), c(m1,m2,m3,m4,m5,m6), pch=19, col = "red")
+
+lm.fit  = lm(height~age, data = lob)
+summary(lm.fit)
+abline(lm.fit$coefficients)
+
+#d.	Does the least squares regression line appear to fit the data very well?
+
+paste("The least squares regression line does appear to fit the data well as most points are near the line and all of the means at each age are very close to the line. However, the data does appear to be better fit with a logarithmic/quadratic line as the means vary off of the linear model line in a manner that represents a more curved line")
+
+#e.	Visually, and numerically, do the variances appear to agree with our linear regression model?
+
+paste("Yes, the MSE for this data set is 2.947 which appears to coincide with how the data appears visually on the graph. However, the variances appear to be different at each point in the graph because the line does not perfectly fit the data.")
+
+#f.	(For this question only) Estimate the mean height for a Loblolly tree that is 15 years old. How do you think this height compares with the actual mean? Explain.
+
+estimate15 <- -1.31240 + 2.59052 * 15
+estimate15
+paste("This height is likely slightly lower than the actaul mean height as almost all of the data points of height at 15 years are above the estimated regression line. ")
+
+#g.	What does the test for the regression coefficient tell you?
+
+paste("The test for the coefficients gives you the estimated b0 and b1 values for a linear least squares regression line modeling the data given. ")
+```
+\newpage
+
+Problem #7: Use the Loblolly dataset again.
+```{r}
+lob <- Loblolly
+
+#a.	How many times does each unique age appear in the dataset? How many unique ages are there, and what are they?
+
+for (i in 1:84) {
+  lob$age[i] <- sqrt(lob$age[i])
+}
+
+
+uage <- unique(lob$age)
+length <- length(uage)
+
+paste("There are",length, "unique age values. They are: 1.732, 2.236, 3.162, 3.873, 4.472, 5")
+
+#b.	What is the mean height, and standard deviation, at each age?
+
+height3 <- subset(lob, age ==sqrt(3))
+m1 <- mean(height3$height)
+m1
+sd(height3$height)
+
+height5 <- subset(lob, age ==sqrt(5))
+m2 <- mean(height5$height)
+m2
+sd(height5$height)
+
+height10 <- subset(lob, age ==sqrt(10))
+m3 <- mean(height10$height)
+m3
+sd(height10$height)
+
+height15 <- subset(lob, age ==sqrt(15))
+m4 <- mean(height15$height)
+m4
+sd(height15$height)
+
+height20 <- subset(lob, age ==sqrt(20))
+m5 <- mean(height20$height)
+m5
+sd(height20$height)
+
+height25 <- subset(lob, age ==sqrt(25))
+m6 <- mean(height25$height)
+m6
+sd(height25$height)
+
+#c.	Construct a single graph with the following: (1) Age(X) vs Height(Y) (2) Mean height at each age against its age. (3) least squares regression linw. Use the code chunk options to make sure the graph is readable. Chance the size of the pointa, the shape of the points, and/or the color of the points to make it readable.
+
+plot( lob$age, lob$height)
+points(c(sqrt(3),sqrt(5),sqrt(10),sqrt(15),sqrt(20),sqrt(25)), c(m1,m2,m3,m4,m5,m6), pch=19, col = "red")
+
+lm.fit  = lm(height~age, data = lob)
+summary(lm.fit)
+abline(lm.fit$coefficients)
+
+#d.	Does the least squares regression line appear to fit the data very well?
+
+paste("The least squares regression line fits the data very well as the means are very close to the regression line.")
+
+#e.	Visually, and numerically, do the variances appear to agree with our linear regression model?
+
+paste("Yes, the MSE for this data set is 1.872 which appears to coincide with how the data appears visually on the graph. There is little variance in the graph.")
+
+
+#g.	What does the test for the regression coefficient tell you?
+
+paste("The test for the coefficients gives you the estimated b0 and b1 values for a linear least squares regression line modeling the data given (height~sqrt(age)) ")
+
+
+#b.	Which version of the data appears to meet the linear regression model assumptions better? Explain. (Base your answer on the visuals and numerical summaries that you are asked to compute.)
+
+paste("The altered data with sqrt(age) appears to meet the linear assumptions model better. The data points for the means are closer to the regression line in this version. Additionally, the mean square error in this version is lower than the original.")
+
+```
+
+
+Problem #8: Start with the original Loblolly dataset and problem.
+```{r}
+lob <- Loblolly
+
+for (i in 1:84) {
+  lob$height[i] <- lob$height[i]^2
+}
+
+#a.	How many times does each unique age appear in the dataset? How many unique ages are there, and what are they?
+
+uage <- unique(lob$age)
+length <- length(uage)
+
+paste("There are",length, "unique age values. They are: 3,5,10,15,20,25.")
+
+#b.	What is the mean height, and standard deviation, at each age?
+
+height3 <- subset(lob, age ==3)
+m1 <- mean(height3$height)
+m1
+sd(height3$height)
+
+height5 <- subset(lob, age ==5)
+m2 <- mean(height5$height)
+m2
+sd(height5$height)
+
+height10 <- subset(lob, age ==10)
+m3 <- mean(height10$height)
+m3
+sd(height10$height)
+
+height15 <- subset(lob, age ==15)
+m4 <- mean(height15$height)
+m4
+sd(height15$height)
+
+height20 <- subset(lob, age ==20)
+m5 <- mean(height20$height)
+m5
+sd(height20$height)
+
+height25 <- subset(lob, age ==25)
+m6 <- mean(height25$height)
+m6
+sd(height25$height)
+
+#c.	Construct a single graph with the following: (1) Age(X) vs Height(Y) (2) Mean height at each age against its age. (3) least squares regression line. Use the code chunk options to make sure the graph is readable. Chance the size of the pointa, the shape of the points, and/or the color of the points to make it readable.
+
+plot( lob$age, lob$height)
+points(c(3,5,10,15,20,25), c(m1,m2,m3,m4,m5,m6), pch=19, col = "red")
+
+lm.fit  = lm(height~age, data = lob)
+summary(lm.fit)
+abline(lm.fit$coefficients)
+
+#d.	Does the least squares regression line appear to fit the data very well?
+
+paste("The least squares regression line fits the data very well as the means are very close to the regression line.")
+
+#e.	Visually, and numerically, do the variances appear to agree with our linear regression model?
+
+paste("Visually, the varainces do appear to agree with the linear regression model as the means are close and equally distributed along the regression line. However, the mean square error is much larger than usual at 224.2 because the response variables have been squared, increasing the variance.")
+
+#g.	What does the test for the regression coefficient tell you?
+
+paste("The test for the coefficients gives you the estimated b0 and b1 values for a linear least squares regression line modeling the data given.(height^2~age) ")
+
+#b.	Which version of the data appears to meet the linear regression model assumptions better? (Square root age or Square Height) Explain. (Base your answer on the visuals and numerical summaries that you are asked to compute.)
+
+paste("Square root age appears to fit the linear regression model better because although both lines fit the model well visually (slightly better fit with square root age), the variance of the square heights is much larger than the square root age variance, making the square root age a better fit for the linear representation model.")
+```
+

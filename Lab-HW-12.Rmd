@@ -1,0 +1,448 @@
+---
+title: "Lab-HW-12"
+author: "Nick Gembs"
+date: "5/7/2021"
+output: word_document
+---
+
+A hospital surgical unit wanted to predict how long a patient would survive a liver operation. The available variables are Blood Clotting score, Prognostic Index, Enzyme Test, Liver Test, Gender (Female = 1), Alcohol Use. Alcohol. Alcohol Use is categorical with 3 categories. None is the reference, Moderate and Severe are the others. SurvivalTime and LNSurvicalTime are the responses. For all parts of this problem, 
+
+
+
+
+1. Load the SurgicalUnit data set.
+```{r}
+
+library(MASS)
+library(leaps)
+library(car)
+Surg <- read.csv("C:/Users/Nick/Downloads/SurgicalUnitFull.csv")
+```
+
+
+2.Determine how many observations are in the dataset. This should be done using a function. Assign the result to a variable n.
+	
+	
+```{r}
+
+n <- nrow(Surg)
+n
+
+```
+
+	
+3.Randomly select half of the integers in the vector 1:n. Assign the resulting vector to a variable called train. ( Just prior to this command, use the command set.seed(16). This will insure that we all have the same results to look at.) The command should reference the variable n and not be the actual number typed in. Until otherwise noted, all work is with regards to the observations referenced by the indices in train. It is as though the remaining data does not exist.
+
+```{r}
+set.seed(16)
+train <- sample(1:n, size = n/2)
+
+```
+
+
+4.Comment on any apparent relationships between any variables. Use only the observations selected in the train variable.
+	
+```{r}
+pairs(~., data = Surg, subset = train)
+```
+	There is a non-linear relationship between survival time and lnsurvival time. This is because one is a function of the other. There also appears to be linear relationships between survival time and clotting, prognostic, enzyme, and liver. There are non-linear relationships with lnsurvival time and these variables.
+	
+5.Fit a linear model for SurvivalTime modeled on Clotting, Prognostic Index, Enzyme Test, and Liver Test. Comment on the how well the Normal Error Regression Model Assumptions Appear to be met. Use only the observations selected in the train variable.
+
+```{r}
+
+lm.fit1 <- lm(SurvivalTime ~ Clotting+Prognostic+Enzyme+Liver, data = Surg, subset = train)
+#summary(lm.fit1)
+par(mfrow = c(2,2))
+plot(lm.fit1)
+```
+	The assumptions for a normal error regression model appear to be approximately met as the residuals appear normally distributed and the qq plot is close to a straight line. The residuals vs fitted plot does appear to be slightly curved with higher values towards the end, this could indicate that the assumptions are not met.
+	
+	
+	
+6.Looking at any summary from the fitted model, does it appear that any variables are useful in describing the response? α=.01 Use only the observations selected in the train variable.
+	
+```{r}
+summary(lm.fit1)
+```
+	It appears that prognostic and enzyme are useful in describing the response as their p-values are less than .01.
+	
+7.Looking at the results from the fitted model, does it appear that all of the variables are useful in describing the response? If not perform a single test with regards to that/those variable(s) to decide their usefulness. α=.01 Use only the observations selected in the train variable.
+```{r}
+lm.fit2 <- lm(SurvivalTime ~ Prognostic+Enzyme, data = Surg, subset = train)
+anova(lm.fit1, lm.fit2)
+```
+	From the fitted model, it appeared that the liver variable was not useful in determining SurvivalTime. After using a full-reduced model anova test, the liver and clotting variables are not useful as the p-value is 0.03677>.01, suggesting that the liver and clotting variables do not add anything to the regression function.
+	
+8.If you reduced your model, does it still meet the assumptions for the normal error regression model? Does if fit better than before? worse? or approximately the same? If you didn’t reduce your model, state that.
+	
+```{r}
+par(mfrow = c(2,2))
+plot(lm.fit2)
+```
+	After the model was reduced, it still meets the assumptions for the normal error regression model. The fit is approximately the same.
+	
+9.You have performed 6 tests up to this point. What are they? List the models being compared for each.
+	
+	1. the command pairs was used to compare each of the variables to one another.
+	
+	2. A linear model was fit with SurvivalTime as the response and Clotting,Prognostic,Enzyme, and Liver as the predictors. T-tests were performed on each of these variables to see if they had a significant effect on the model.
+	
+	3. An F-test was performed on the linear model with SurvivalTime as the response and Clotting,Prognostic,Enzyme, and Liver as the predictors. This model was compared to a model where all of the beta values were zero to determine if any of the variables were useful in determining the response.
+	
+	4. A linear model was fit with SurvivalTime as the response and Prognostic and Enzyme as the predictors. T-tests were performed on each of these variables to see if they had a significant effect on the model.
+	
+	5. An F-test was performed on the linear model with SurvivalTime as the response and Prognostic and Enzyme as the predictors. This model was compared to a model where all of the beta values were zero to determine if any of the variables were useful in determining the response.
+	
+	6. An anova test was performed to compare the full model in 2 to the reduced model in 4. These models were compared and an F-statistic was created to see if the Liver/Clotting variables had a significant effect on the response in comparison to a model without the liver/clotting variables. 
+	
+	
+	10.Using your final model, estimate with approximately 90% confidence the mean survival time of an individual with a Clotting value of 6.0, prognostic Index of 60, an Enzyme Test value of 70, and a liver value of 3. Use only the observations selected in the train variable.
+	
+```{r}
+nd <- data.frame(Clotting = c(6.0), Prognostic = c(60), Enzyme = c(70), Liver = c(3))
+predict(lm.fit2, newdata = nd, interval = "confidence", level = 0.90)
+
+```
+	
+11.Compute the Mean Square Predictive Error for your model. The Test data should be the half of the original data set that was not used to build this model.
+#1. Assign the responses that DON'T correspond to a training data value to a variable y
+```{r}
+total <- 1:n
+s <- total[-train]
+l <- length(s)
+y <- Surg$SurvivalTime[s]
+y
+```
+
+
+#2. Use the predict function. The model should be the one built using just the data in the training subset. The newdata should be all observations that are not in the training subset.
+```{r}
+
+nd = data.frame( Clotting = Surg$Clotting[s], Prognostic = Surg$Prognostic[s], Enzyme = Surg$Enzyme[s], Liver = Surg$Liver[s], SurvivalTime = Surg$SurvivalTime[s])
+predict <- predict(lm.fit2, newdata = nd)
+```
+
+
+#3. Subtract the two previous values.
+```{r}
+subtract <- Surg$SurvivalTime[s] - predict(lm.fit2, newdata = nd)
+```
+
+
+#4. Square all the differences you just computed.
+
+```{r}
+subtractsq <- subtract^2
+```
+
+#5. Take the average of all these squared distances.
+
+```{r}
+n <- length(subtractsq)
+mean <- sum(subtractsq)/n
+```
+
+#6. That is your MSPE
+```{r}
+mean
+```
+
+
+\newpage
+Problem #2: Using the same training data, use Best Subsets selection to select a model with the lowest BIC value.(subset can be used as an argument.) For all parts of this problem, consider the response SurvivalTime, and the predictors: Clotting, Prognostic,Enzyme, and Liver only.
+
+11.	For this part, we will use the same training data. Determine the model using Best Subsets selection with the lowest BIC value.
+```{r}
+regfit.full <- regsubsets(SurvivalTime ~ Clotting+Prognostic+Enzyme+Liver, data = Surg, subset = train , nbest = 1, nvmax = 4)
+reg.sum <- summary(regfit.full)
+reg.sum
+reg.sum$bic
+
+```
+The model with the lowest bic value is the model with 3 predictors. From best subsets selection, we can determine that this model is SurvivalTime ~ Clotting+Prognostic+Enzyme.
+
+12.	Compared to the model you selected in the last part, does this model fit the normal error assumptions better? worse? or approximately the same?
+```{r}
+lm.fit <- lm(SurvivalTime ~ Clotting+Prognostic+Enzyme, data = Surg)
+par(mfrow = c(2,2))
+plot(lm.fit)
+```
+After the model was changed, it still meets the assumptions for the normal error regression model. The fit is approximately the same. However, the residuals vs fitted plot is slightly less curved, indicating a slightly better fit.
+
+
+13.	Using your selected model, estimate with approximately 90% confidence the mean survival time of an individual with a Clotting value of 6.0, prognostic Index of 60, an Enzyme Test value of 70, and a liver value of 3.
+```{r}
+nd <- data.frame(Clotting = c(6.0), Prognostic = c(60), Enzyme = c(70), Liver = c(3))
+predict(lm.fit, newdata = nd, interval = "confidence", level = 0.90)
+```
+
+
+14.	Compute the Mean Square Predictive Error for your model. The Test data should be the half of the original data set that was not used to build this model.
+```{r}
+
+nd = data.frame( Clotting = Surg$Clotting[s], Prognostic = Surg$Prognostic[s], Enzyme = Surg$Enzyme[s], Liver = Surg$Liver[s], SurvivalTime = Surg$SurvivalTime[s])
+
+predict <- predict(lm.fit, newdata = nd)
+subtract <- Surg$SurvivalTime[s] - predict(lm.fit, newdata = nd)
+
+subtractsq <- subtract^2
+
+n <- length(subtractsq)
+
+mean <- sum(subtractsq)/n
+mean
+```
+
+\newpage
+Problem #3: For this portion, you will use all variables (Except LNSurvivalTime) in the SurgicalUnit dataset. Limit yourself to just the observations in the training data. Remember, the Alcohol variables come as a pair. They should either both be in the model, or neither is in the model.
+
+15.	Use the backward selection method to determine the best model using bic.
+
+```{r}
+regfit.fwd = regsubsets(SurvivalTime ~ Clotting+Prognostic+Enzyme+Liver+Age+Gender+Alc.Mod+Alc.Heavy, data = Surg, subset = train, method = "backward")
+sum.fwd <- summary(regfit.fwd)
+sum.fwd
+sum.fwd$bic
+```
+The model with the lowest bic value is the model with 5 predictors. From best subsets selection, we can determine that this model is SurvivalTime ~ Prognostic+Enzyme+Liver+Alc.Mod+Alc.Heavy.
+
+16.	Using your best model, estimate with approximately 90% confidence the mean survival time of an individual with a Clotting value of 6.0, prognostic Index of 60, an Enzyme Test value of 70, and a liver value of 3 of a 35 year old Female that does not drink.
+
+```{r}
+lm.fit <- lm(SurvivalTime ~ Prognostic+Enzyme+Liver+Alc.Mod+Alc.Heavy, data = Surg)
+nd <- data.frame(Clotting = c(6.0), Prognostic = c(60), Enzyme = c(70), Liver = c(3), Age = c(35), Alc.Mod = c(0), Alc.Heavy = c(0))
+predict(lm.fit, newdata = nd, interval = "confidence", level = 0.90)
+```
+
+17.	Compared to the models you selected in the previous parts, does this model fit the normal error assumptions better? worse? or approximately the same?
+
+```{r}
+lm.fit <- lm(SurvivalTime ~ Prognostic+Enzyme+Liver+Alc.Mod+Alc.Heavy, data = Surg)
+par(mfrow = c(2,2))
+plot(lm.fit)
+```
+This model fits the normal error assumptions the best out of all of the models tested so far. The qq plot is the closest to linear, the residuals seem the most normal, and the residual plot has the least curve.
+
+18.	Compute the Mean Square Predictive Error for your model. The Test data should be the half of the original data set that was not used to build this model.
+
+```{r}
+nd = data.frame( Clotting = Surg$Clotting[s], Prognostic = Surg$Prognostic[s], Enzyme = Surg$Enzyme[s], Liver = Surg$Liver[s], SurvivalTime = Surg$SurvivalTime[s], Alc.Mod = Surg$Alc.Mod[s], Alc.Heavy = Surg$Alc.Heavy[s])
+
+predict <- predict(lm.fit, newdata = nd)
+subtract <- Surg$SurvivalTime[s] - predict(lm.fit, newdata = nd)
+
+subtractsq <- subtract^2
+
+n <- length(subtractsq)
+
+mean <- sum(subtractsq)/n
+mean
+```
+
+\newpage
+Problem #4: Repeat all of the previous with a different training set. Do you get the same models? Do you get the same results? Use set.seed() so that your results don’t change each time you compile.
+
+2.Determine how many observations are in the dataset. This should be done using a function. Assign the result to a variable n.
+	
+	
+```{r}
+
+n <- nrow(Surg)
+n
+
+```
+
+	
+3.Randomly select half of the integers in the vector 1:n. Assign the resulting vector to a variable called train. ( Just prior to this command, use the command set.seed(16). This will insure that we all have the same results to look at.) The command should reference the variable n and not be the actual number typed in. Until otherwise noted, all work is with regards to the observations referenced by the indices in train. It is as though the remaining data does not exist.
+
+```{r}
+set.seed(5)
+train <- sample(1:n, size = n/2)
+
+```
+
+
+4.Comment on any apparent relationships between any variables. Use only the observations selected in the train variable.
+	
+```{r}
+pairs(~., data = Surg, subset = train)
+```
+	There is a non-linear relationship between survival time and lnsurvival time. This is because one is a function of the other. There also appears to be linear relationships between survival time and clotting, prognostic, enzyme, and liver. There are non-linear relationships with lnsurvival time and these variables.
+	
+5.Fit a linear model for SurvivalTime modeled on Clotting, Prognostic Index, Enzyme Test, and Liver Test. Comment on the how well the Normal Error Regression Model Assumptions Appear to be met. Use only the observations selected in the train variable.
+
+```{r}
+
+lm.fit1 <- lm(SurvivalTime ~ Clotting+Prognostic+Enzyme+Liver, data = Surg, subset = train)
+#summary(lm.fit1)
+par(mfrow = c(2,2))
+plot(lm.fit1)
+```
+	The assumptions for a normal error regression model appear to be approximately met as the residuals appear normally distributed and the qq plot is close to a straight line. The residuals vs fitted plot does appear to be slightly curved with higher values towards the end, this could indicate that the assumptions are not met.
+	
+	
+	
+6.Looking at any summary from the fitted model, does it appear that any variables are useful in describing the response? α=.01 Use only the observations selected in the train variable.
+	
+```{r}
+summary(lm.fit1)
+```
+	It appears that prognostic and enzyme are useful in describing the response as their p-values are less than .01.
+	
+7.Looking at the results from the fitted model, does it appear that all of the variables are useful in describing the response? If not perform a single test with regards to that/those variable(s) to decide their usefulness. α=.01 Use only the observations selected in the train variable.
+```{r}
+lm.fit2 <- lm(SurvivalTime ~ Prognostic+Enzyme, data = Surg, subset = train)
+anova(lm.fit1, lm.fit2)
+```
+	From the fitted model, it appeared that the liver variable was not useful in determining SurvivalTime. After using a full-reduced model anova test, the liver and clotting variables are not useful as the p-value is 0.03677>.01, suggesting that the liver and clotting variables do not add anything to the regression function.
+	
+8.If you reduced your model, does it still meet the assumptions for the normal error regression model? Does if fit better than before? worse? or approximately the same? If you didn’t reduce your model, state that.
+	
+```{r}
+par(mfrow = c(2,2))
+plot(lm.fit2)
+```
+
+```{r}
+nd <- data.frame(Clotting = c(6.0), Prognostic = c(60), Enzyme = c(70), Liver = c(3))
+predict(lm.fit2, newdata = nd, interval = "confidence", level = 0.90)
+
+```
+	
+11.Compute the Mean Square Predictive Error for your model. The Test data should be the half of the original data set that was not used to build this model.
+#1. Assign the responses that DON'T correspond to a training data value to a variable y
+```{r}
+total <- 1:n
+s <- total[-train]
+l <- length(s)
+y <- Surg$SurvivalTime[s]
+y
+```
+
+
+#2. Use the predict function. The model should be the one built using just the data in the training subset. The newdata should be all observations that are not in the training subset.
+```{r}
+
+nd = data.frame( Clotting = Surg$Clotting[s], Prognostic = Surg$Prognostic[s], Enzyme = Surg$Enzyme[s], Liver = Surg$Liver[s], SurvivalTime = Surg$SurvivalTime[s])
+predict <- predict(lm.fit2, newdata = nd)
+```
+
+
+#3. Subtract the two previous values.
+```{r}
+subtract <- Surg$SurvivalTime[s] - predict(lm.fit2, newdata = nd)
+```
+
+
+#4. Square all the differences you just computed.
+
+```{r}
+subtractsq <- subtract^2
+```
+
+#5. Take the average of all these squared distances.
+
+```{r}
+n <- length(subtractsq)
+mean <- sum(subtractsq)/n
+```
+
+#6. That is your MSPE
+```{r}
+mean
+```
+
+
+\newpage
+Problem #2: Using the same training data, use Best Subsets selection to select a model with the lowest BIC value.(subset can be used as an argument.) For all parts of this problem, consider the response SurvivalTime, and the predictors: Clotting, Prognostic,Enzyme, and Liver only.
+
+11.	For this part, we will use the same training data. Determine the model using Best Subsets selection with the lowest BIC value.
+```{r}
+regfit.full <- regsubsets(SurvivalTime ~ Clotting+Prognostic+Enzyme+Liver, data = Surg, subset = train , nbest = 1, nvmax = 4)
+reg.sum <- summary(regfit.full)
+reg.sum
+reg.sum$bic
+
+```
+The model with the lowest bic value is the model with 3 predictors. From best subsets selection, we can determine that this model is SurvivalTime ~ Clotting+Prognostic+Enzyme.
+
+12.	Compared to the model you selected in the last part, does this model fit the normal error assumptions better? worse? or approximately the same?
+```{r}
+lm.fit <- lm(SurvivalTime ~ Clotting+Prognostic+Enzyme, data = Surg)
+par(mfrow = c(2,2))
+plot(lm.fit)
+```
+After the model was changed, it still meets the assumptions for the normal error regression model. The fit is approximately the same. However, the residuals vs fitted plot is slightly less curved, indicating a slightly better fit.
+
+
+13.	Using your selected model, estimate with approximately 90% confidence the mean survival time of an individual with a Clotting value of 6.0, prognostic Index of 60, an Enzyme Test value of 70, and a liver value of 3.
+```{r}
+nd <- data.frame(Clotting = c(6.0), Prognostic = c(60), Enzyme = c(70), Liver = c(3))
+predict(lm.fit, newdata = nd, interval = "confidence", level = 0.90)
+```
+
+
+14.	Compute the Mean Square Predictive Error for your model. The Test data should be the half of the original data set that was not used to build this model.
+```{r}
+
+nd = data.frame( Clotting = Surg$Clotting[s], Prognostic = Surg$Prognostic[s], Enzyme = Surg$Enzyme[s], Liver = Surg$Liver[s], SurvivalTime = Surg$SurvivalTime[s])
+
+predict <- predict(lm.fit, newdata = nd)
+subtract <- Surg$SurvivalTime[s] - predict(lm.fit, newdata = nd)
+
+subtractsq <- subtract^2
+
+n <- length(subtractsq)
+
+mean <- sum(subtractsq)/n
+mean
+```
+
+\newpage
+Problem #3: For this portion, you will use all variables (Except LNSurvivalTime) in the SurgicalUnit dataset. Limit yourself to just the observations in the training data. Remember, the Alcohol variables come as a pair. They should either both be in the model, or neither is in the model.
+
+15.	Use the backward selection method to determine the best model using bic.
+
+```{r}
+regfit.fwd = regsubsets(SurvivalTime ~ Clotting+Prognostic+Enzyme+Liver+Age+Gender+Alc.Mod+Alc.Heavy, data = Surg, subset = train, method = "backward")
+sum.fwd <- summary(regfit.fwd)
+sum.fwd
+sum.fwd$bic
+```
+The model with the lowest bic value is the model with 4 predictors. From best subsets selection, we can determine that this model is SurvivalTime ~ Prognostic+Enzyme+Liver+Alc.Heavy.
+
+16.	Using your best model, estimate with approximately 90% confidence the mean survival time of an individual with a Clotting value of 6.0, prognostic Index of 60, an Enzyme Test value of 70, and a liver value of 3 of a 35 year old Female that does not drink.
+
+```{r}
+lm.fit <- lm(SurvivalTime ~ Prognostic+Enzyme+Liver+Alc.Heavy, data = Surg)
+nd <- data.frame(Clotting = c(6.0), Prognostic = c(60), Enzyme = c(70), Liver = c(3), Age = c(35), Alc.Mod = c(0), Alc.Heavy = c(0))
+predict(lm.fit, newdata = nd, interval = "confidence", level = 0.90)
+```
+
+17.	Compared to the models you selected in the previous parts, does this model fit the normal error assumptions better? worse? or approximately the same?
+
+```{r}
+lm.fit <- lm(SurvivalTime ~ Prognostic+Enzyme+Liver+Alc.Mod+Alc.Heavy, data = Surg)
+par(mfrow = c(2,2))
+plot(lm.fit)
+```
+This model fits the normal error assumptions the best out of all of the models tested so far. The qq plot is the closest to linear, the residuals seem the most normal, and the residual plot has the least curve.
+
+18.	Compute the Mean Square Predictive Error for your model. The Test data should be the half of the original data set that was not used to build this model.
+
+```{r}
+nd = data.frame( Clotting = Surg$Clotting[s], Prognostic = Surg$Prognostic[s], Enzyme = Surg$Enzyme[s], Liver = Surg$Liver[s], SurvivalTime = Surg$SurvivalTime[s], Alc.Mod = Surg$Alc.Mod[s], Alc.Heavy = Surg$Alc.Heavy[s])
+
+predict <- predict(lm.fit, newdata = nd)
+subtract <- Surg$SurvivalTime[s] - predict(lm.fit, newdata = nd)
+
+subtractsq <- subtract^2
+
+n <- length(subtractsq)
+
+mean <- sum(subtractsq)/n
+mean
+```
+
+When using a different training set, the sample size is high enough where the general trends and relationships are the same for each of the models. However, for backwards seclection, different variables were selected for the ideal model. Only 4 predictors were chosen instead of 5 due to the BIC. Those were Prognostic, liver, Enzyme, and Alc.Heavy. The overall MSPE values for each of the tests were pretty similar for the different training sets. For the best selection method in problem 2, the test selected the same three predictors. All of the graphs for testing if the models met the assumptions of normal error looked approximately the same.

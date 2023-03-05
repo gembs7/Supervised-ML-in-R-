@@ -1,0 +1,169 @@
+---
+title: "Nick Gembs LabHW 2"
+author: "Nick Gembs"
+date: "2/19/2021"
+output: word_document
+---
+
+
+1.	Examples given by TAs
+
+```{r}
+#Making Vectors
+
+x <- c(1,4,5,7,7.6,8)
+y <- c(8,6,6,7,4,1)
+
+#Side by side plots
+
+par(mfrow = c(1,2))
+
+plot(x,y, xlab = "Xlabel", ylab = "Tlabel", main = "Title")
+plot(x,y, xlab = "Xlabel", ylab = "Tlabel", main = "Title", type = "l")
+abline(h=3, col="red")
+
+```
+
+
+```{r}
+
+#Random Number
+par(mfrow = c(1,2))
+
+n = 10000
+z1 <- rnorm(n, mean = 2, sd = 1)
+
+#density histogram
+
+hist(z1, freq = F, xlim = c(-3,7))
+curve(dnorm(x, mean = 2, sd =1), from = -3, to = 7, col = "red", add = T)
+
+z2 <- rnorm(n, mean = 2.1, sd = 1)
+hist(z1, xlim = c(-3,7), freq = F)
+hist(z2, xlim = c(-3,7), freq = F, col = "blue", add = T, density = 20)  
+```
+
+
+\newpage
+
+
+2.	Suppose there are two urns each filled with a mix of blue and red miniature marbles. Urn A contains 1% blue marbles. Urn B contains 2% blue marbles. One of the urns has gone missing. You want to determine which urn remains. You decide that you will close your eyes, take only one marble from the urn, and look at only that marbles color. Based on the color of the marble, you will decide whether it is Urn A or Urn B.
+
+•	Describe your decision making process? It can be as simple as “If this happens, then …”, “If that happens, then …” or “If the other thing happens, then …”.
+
+If a blue marble is taken from the urn, than I will decide it is Urn B, If the marble is red, I will decide on urn A.
+
+•	Based on your decision making process and assuming that it is Urn A, what is the probability that you would decide, correctly, that it is Urn A? Explain. Based on your decision making process and assuming that it is Urn B, what is the probability that you would decide, incorrectly, that it is Urn A? Explain.
+
+```{r}
+
+#Given Urn A, choose Urn A
+CorrectA <- .99
+
+#Given Urn B, choose Urn A
+IncorrectA <- .98
+```
+
+Given that the Urn is urn A, there is a `r CorrectA` chance of choosing correctly because 99% of the balls in urn A are red and a red ball signifies Urn A. Given that the urn is urn B, there is a `r IncorrectA` chance of incorrectly choosing urn A because 98% of the balls in urn B are red and a red ball signifies urn A.
+
+
+3.	Assume that Urn B has 4% blue marbles. Based on the same decision making process and assuming that it is Urn A, what is the probability that you would decide, correctly, that it is Urn A? Assuming that it is Urn B, what is the probability that you would decide, incorrectly, that it is Urn A? Explain.
+
+```{r}
+
+#Given Urn A, choose Urn A
+CorrectA <- .99
+
+#Given Urn B, choose Urn A
+IncorrectA2 <- .96
+```
+
+Given that the Urn is urn A, there is a `r CorrectA` chance of choosing correctly because 99% of the balls in urn A are red and a red ball signifies Urn A. Given that the urn is urn B, there is a `r IncorrectA2` chance of incorrectly choosing urn A because 98% of the balls in urn B are red and a red ball signifies urn A.
+
+4.	Assume that Urn B has X% blue marbles. Based on the same decision making process and assuming that it is Urn A, what is the probability that you would decide, correctly, that it is Urn A? Assuming that it is Urn B, what is the probability that you would decide, incorrectly, that it is Urn A? Explain.
+
+```{r}
+#Given Urn A, choose Urn A
+CorrectA <- .99
+
+#Given Urn B, choose Urn A
+IncorrectA3 <- 1-(x/100)
+```
+Given that the Urn is urn A, there is a `r CorrectA` chance of choosing correctly because 99% of the balls in urn A are red and a red ball signifies Urn A. Given that the urn is urn B, there is a 1-(X/100) chance of incorrectly choosing urn A because 98% of the balls in urn B are red and a red ball signifies urn A.
+
+\newpage
+
+5.	Create a graph that plots the percentage of blue marbles in the Urn versus the probability that you would decide, that it is Urn A
+
+
+```{r}
+
+x = seq(0,1, by = .1)
+y = 1-(x/100)
+plot(x,y, xlim = c(0,1), type = "l")
+```
+
+
+\newpage
+
+6.	The Teaching Assistant generated random samples from two normal distributions with standard deviation 1. The means used were 2 and 2.1. The rMysteryGenerator function, demonstrated in class, generates samples from one of those distributions. Suppose a single value is generated using rMysteryGenerator(1). Explain, using graphs and without computing a probability, why it would be impossible to say with any significant degree of confidence, which distribution was used.
+
+2.0151
+
+```{r}
+par(mfrow = c(1,2))
+
+n = 1
+z1 <- rnorm(n, mean = 2, sd = 1)
+z2 <- rnorm(n, mean = 2.1, sd = 1)
+
+hist(z1, xlim = c(-3,7), freq = F , xlab = "Value", main = "Comparing means of distributions")
+hist(z2, xlim = c(-3,7), freq = F, col = "blue", add = T, density = 20)
+
+
+n = 10000
+z1 <- rnorm(n, mean = 2, sd = 1)
+z2 <- rnorm(n, mean = 2.1, sd = 1)
+
+hist(z1, xlim = c(-3,7), freq = F , xlab = "Value", main = "Comparing means of distributions")
+hist(z2, xlim = c(-3,7), freq = F, col = "blue", add = T, density = 20)  
+```
+Since the means of the 2 distributions are relatively close and only one sample was drawn, it is impossible to say which sample the value was drawn from. n=1 is not a large enough sample to compute a mean.
+\newpage
+
+7.	Suppose a six-thousand values are generated using rMysteryGenerator(6000) and the mean is computed and given to you. Explain, using graphs and without computing a probability, why it would be possible to say with an extremely high degree of confidence, which distribution was used.
+
+2.09267
+
+```{r}
+n = 6000
+z1 <- rnorm(n, mean = 2, sd = 1)
+z2 <- rnorm(n, mean = 2.1, sd = 1)
+
+hist(z1, xlim = c(-3,7), freq = F , xlab = "Value", main = "Comparing means of distributions")
+hist(z2, xlim = c(-3,7), freq = F, col = "blue", add = T, density = 20)  
+```
+With 6000 values, we can claim with some degree of confidence, that the sample belongs to the distribution with a mean of 2.1. As seen in the graph, a sample of 6000 values displays a distribution in which there is a noticable difference in means. 2.09267 is very close to the mean of 2.1.
+
+\newpage
+
+8.	It was stated in a previous course that the mean of a Chi-Squared distribution is equal to its degrees of freedom. Perform a test of this statement using a .05 significance level based on a sample of size 10 on a Chi-Squared distribution with 1 degree of freedom. Check any necessary assumptions. Report the p-value, test statistic, and the critical values that would be used for such a test. Explain the inherent problems with this particular test. Make some graphs to assist in your explanation.
+
+```{r}
+n = 10
+
+s1 <- rchisq(n, df = 1)
+
+stat <- t.test(s1, mu = 1, alternative = "two.sided", conf.level = .05)
+stat
+
+p <- stat$p.value
+t <- stat$statistic
+hist(s1, xlim = c(-3,7), freq = F, xlab = "value")
+
+cv1 <- pchisq(.05, 1, lower.tail = T)
+cv2 <- pchisq(.95, 1, lower.tail = F)
+```
+
+The p-value of this particular test is `p`. The null is that the mean of this sample is equal to the degrees of freedom, 1. The alternative is that the mean is not equal to 1. The test statistic of the t test is `t` while the critical values are `cv1` and `cv2`. Since the test statistic is outside of the range of the critical values and the p-value is less than .05, we can reject the null and accept the alternative. Since the n value is only 10, there is an inherent problem with the validity of this test as the sample size is not large enough.
+

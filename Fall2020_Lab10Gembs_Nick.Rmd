@@ -1,0 +1,160 @@
+---
+title: 'Lab #10'
+author: "Nick Gembs"
+date: "11/30/2020"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Example
+
+1. Create a function called **between** that determines if a **testValue** is inside an **interval**. It should take two arguments: **interval** should be a vector of length 2, with values in increasing order,  **testValue** is the number that is being tested. If **testValue** is inside the interval, **between** should return TRUE. Otherwise, **between** should return FALSE.
+```{r, eval = T, echo = T}
+between = function(interval, testValue = 0){
+  if ( testValue > interval[1] & testValue <interval[2]){
+    return(T)
+  }else{
+    return(F)
+  }
+}
+
+```
+
+
+2. Create 4 dnorm curves. Use sd equal to 0.5, 1, 3, and 5, and mean 0.  All curves should be on the same graph. Give each a different color. 
+```{r, eval = T, echo = T}
+plot.new()
+plot.window(xlim = c(-10,10) , ylim = c(0,1))
+curve(dnorm(x, mean = 0, sd = .5), from = -10, to = 10 , add=T , col = "red")
+curve(dnorm(x, mean = 0, sd = 1), from = -10, to = 10 , add=T , col = "green", lty = 2)
+curve(dnorm(x, mean = 0, sd = 3), from = -10, to = 10 , add=T , col = "blue")
+curve(dnorm(x, mean = 0, sd = 5), from = -10, to = 10 , add=T , col = "pink")
+axis(1)
+axis(2)
+legend("topright", legend = c("sd=.5", "sd=1", "sd=3", "sd=5"), col = c("red", "green", "blue", "pink"), lty = c(1,2,1,1))
+```
+
+
+3. Generate 3 random numbers from a normal distribution with mean zero and standard deviation 0.5. Construct a 95% confidence interval for the mean of this normal distribution. Determine if the confidence interval surrounds the mean.
+```{r, echo = T, eval = T}
+n=3
+sd=.5
+x=rnorm(n, mean=0, sd=sd)
+results = t.test(x , conf.level = .95)
+results
+str(results)
+
+CI = results$conf.int
+CI
+
+between(CI, 0)
+```
+
+
+4. Repeat the previous problem 1000 times. Keep track of the results. Determine the proportion of the time that the 95% confidence interval surrounds the mean.
+```{r, echo = T, eval = T}
+
+holder = rep(NA, 1000)
+n=3
+sd=.5
+for(i in 1:1000){
+  x=rnorm(n, mean=0, sd=sd)
+  results=t.test(x,conf.level=.95)
+  CI = results$conf.int
+  logic = between (CI,0)
+  holder[i] = logic
+}
+
+mean(holder)
+```
+
+
+### Homework
+
+
+5. Create 4 dchisq curves. Use degrees of freedom equal to 0.1, 1, 3, and 5. Fun fact, the mean of a Chi-square distribution is equal to its degrees of freedom. All curves should be on the same graph. Give each a different color. Give each a different line type. The plotting window should have horizontal limits from 0 to 10, and vertical limits from 0 to 1.  The title should be "ChiSquare by Degrees of Freedom". Add the axes, and a legend. (Mimic Example #2)
+
+```{r, echo = T, eval = T}
+plot.new()
+plot.window(xlim = c(0,10) , ylim = c(0,1))
+curve(dchisq(x, df = .1), from = 0 , to = 10 , add=T , col = "red", lty = 1)
+curve(dchisq(x, df = 1), from = 0 , to = 10 , add=T , col = "green", lty = 2)
+curve(dchisq(x, df = 3), from = 0 , to = 10 , add=T , col = "blue", lty = 3)
+curve(dchisq(x, df = 5), from = 0 , to = 10 , add=T , col = "pink", lty = 4)
+axis(1)
+axis(2)
+title(main = "ChiSquare by Degrees of Freedom")
+legend("topright", legend = c("sd=.5", "sd=1", "sd=3", "sd=5"), col = c("red", "green", "blue", "pink"), lty = c(1,2,3,4))
+```
+
+6. Generate 30 random numbers from a chisquare distribution with 0.1 degrees of freedom. Construct a 95% confidence interval for the mean of the chisquare distribution. Determine if the confidence interval surrounds the mean. Fun fact, the mean of a Chi-square distribution is equal to its degrees of freedom.
+```{r, echo = T, eval = T}
+n=30
+x=rchisq(n, df = .1)
+results = t.test(x , conf.level = .95)
+results
+str(results)
+
+CI = results$conf.int
+CI
+
+between(CI, .1)
+```
+
+
+7. Repeat the previous problem 1000 times. Keep track of the results. Determine the proportion of the time that the 95% confidence interval surrounds the mean. 
+
+```{r, echo = T, eval = T}
+
+holder1 = rep(NA, 1000)
+n=30
+for(i in 1:1000){
+  x=rchisq(n, df = .1)
+  results=t.test(x,conf.level=.95)
+  CI = results$conf.int
+  logic = between (CI,.1)
+  holder[i] = logic
+}
+
+mean(holder)
+```
+
+8. In problem 7, you have R simulate constructing one-thousand 95% confidence intervals. According to the name, 95% confidence interval, approximately 95% of the intervals should surround the mean of the distribution being sampled.  That is not the case. Why not? There are two things that you can modify, individually, that will make the actual confidence level match the stated confidence level. What are they? For each, demonstrate, via a similar simulation, that they correct the mismatch. In reality, which one can you actually control. (Changing rchisq to rnorm, rbinom, runif etc is not allowed. We already know that using rnorm will work.)
+
+
+```{r, echo = T, eval = T}
+holder1 = rep(NA, 1000)
+n=30
+for(i in 1:1000){
+  x=rchisq(n, df = 20)
+  results=t.test(x,conf.level=.95)
+  CI = results$conf.int
+  logic = between (CI,20)
+  holder1[i] = logic
+}
+
+mean(holder1)
+```
+First, we can increase the degrees of freedom. Increasing the degrees of freedom makes the distribution look more even, similar to a normal distribution, creating a confidence interval that a t-test can more accurately depict.
+
+
+```{r, echo = T, eval = T}
+
+
+holder2 = rep(NA, 1000)
+n=3000
+for(i in 1:1000){
+  x=rchisq(n, df = .1)
+  results=t.test(x,conf.level=.95)
+  CI = results$conf.int
+  logic = between (CI,.1)
+  holder2[i] = logic
+}
+
+mean(holder2)
+
+```
+Second, we can increase the sample size *n*. This will give the t-test more data within the distribution to work with, creating a more accurate representation of the actual population, making a confidence interval more accurate.

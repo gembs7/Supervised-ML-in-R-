@@ -1,0 +1,81 @@
+---
+title: "ECONhw5"
+author: "Nick Gembs"
+date: "3/31/2022"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r}
+library(dplyr)
+data <- read.csv("C:/Users/Nick/Downloads/pntsprd.csv")
+
+#2.1
+
+data$sprdcvr
+
+t.test(data$sprdcvr,mu = .5, paired = F, conf.level=.9)
+
+# Fail to reject the null hyothesis as the p-value if greater than .05.
+```
+
+```{r}
+#2.2
+
+gamesonneutralcourt = sum(data$neutral)
+gamesonneutralcourt
+```
+```{r}
+#2.3
+
+lm.fit <- lm(data$sprdcvr ~ data$favhome + data$neutral + data$fav25 + data$und25)
+summary(lm.fit)
+
+# Load libraries
+library("lmtest")
+library("sandwich")
+
+# Robust t test
+hetero.fit <- coeftest(lm.fit, vcov = vcovHC(lm.fit, type = "HC0"))
+hetero.fit
+summary(hetero.fit)
+
+# Standard errors do not significantly change for any estimators when assuming heteroskedasticity robust model. heteroskedasticity robust model is more significant (lower p-values).
+```
+
+```{r}
+#2.4
+
+# If all of the estimators equal zero (B1 = B2 = B3 = B4 = 0), the OLS fit will just be a horizontal line across the data with a y value at the mean of the regressand (sprdcvr). Since sprdcvr is binary and all estimators equal zero, variance of error will not be dependent on any regressor, suggesting homoskedascticity.
+```
+
+```{r}
+#2.5
+
+# None of the statistics in any of the tests performed on the model above have shown any significance of relationship between the regressors and if the game will cover the spread. This suggests that the market of sports betting is efficient and that one cannot use available data to get advantage in calling sports bets.
+```
+
+```{r}
+#2.6
+
+lm.fit$fitted.values
+```
+
+
+```{r}
+#2.7
+
+library(foreign)
+
+logit <- glm(data$sprdcvr ~ data$favhome + data$neutral + data$fav25 + data$und25, family=binomial(link="logit")) 
+logit
+summary(logit)
+
+probit <- glm(data$sprdcvr ~ data$favhome + data$neutral + data$fav25 + data$und25, family=binomial(link="probit")) 
+probit
+summary(probit)
+
+# Probit and logit models still return similar results without statisticsal significance.
+```
+

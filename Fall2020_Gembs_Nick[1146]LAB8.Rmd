@@ -1,0 +1,226 @@
+---
+title: 'Lab #9'
+author: "Nick Gembs"
+date: "11/02/2020"
+output:
+  word_document: default
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Examples
+
+1. Create this graph: 
+
+```{r fig.height=4, fig.width=4, out.height= 400}
+
+#set margins
+par(mar = c(2,5,5,2))
+#new plotting region
+plot.new()
+# set up coordinate system
+plot.window(xlim = c(0,10), ylim = c(0,10), asp = 1)
+#make axises
+axis(1 , pos = -.5)
+axis(2 , pos = -.5, at = 0:10, labels = 0:10)
+axis(3 , pos = 10, las = 2)
+axis(4,pos = 10.5,  las = 2)
+
+#make red lines
+abline(h = c(0,10) , col = "red")
+abline(v = c(0,10) , col = "red")
+
+#make a grey box
+polygon(c(.5,9.5,9.5,.5) , c(0,0,9.5,9.5) , col = "grey")
+
+#create point in the mmiddle
+points(5,5, pch = 2)
+
+#text
+text(5,5, "pos1" , pos = 1)
+text(5,5, "pos2" , pos = 2)
+text(5,5, "pos3" , pos = 3)
+text(5,5, "pos4" , pos = 4)
+
+#other points
+points(2,2,pch = 8,cex=2,col="red")
+points(2,5,pch = 8,cex=4,col="red")
+
+#titles
+title(main = "Grey plotting region" , xlab = "x axis", ylab = "y axis")
+```
+
+
+
+\newpage
+
+
+
+2. Create the given graph. As needed use the included functions: topCircleMaker and DiscMaker.
+
+
+```{r }
+##THESE ARE MY FUNCTIONS FOR ANYONE TO USE
+#Given a value x that lies between -radius and +radius, topCircleMaker will determine the the positive y value such that x^2+y^2=radius^2.
+topCircleMaker<-function(x,radius=1){
+  top<-sqrt(  (radius^2-(x)^2 )    )
+  return(top)
+}
+
+#DiscMaker create a colored disc of a given radius centered at (xcenter,ycenter).
+DiscMaker<-function( radius=1 , xcenter=0 , ycenter=0 , col="black"){
+  xup<-c(seq(-radius,radius,by=radius/500))
+  yup<-topCircleMaker(xup,radius=radius)
+  xdown<-c(seq(radius,-radius,by=-radius/500))
+  ydown<- -topCircleMaker(xdown,radius=radius)
+  x<-c(xup,xdown)+xcenter
+  y<-c(yup,ydown)+ycenter
+  polygon(x,y,col=col)
+}
+```
+
+```{r fig.height=4, fig.width=4, out.height=400 }
+#set margins
+par(mar = c(2,5,5,2))
+#plotting region
+plot.new()
+#set up coordinate
+plot.window(xlim = c(-1,1), ylim = c(-1,1))
+#axises
+axis(1, at = -1:1, labels = 1:3)
+axis(2, at = -1:1, labels = 17:19)
+
+#make a black disc
+DiscMaker(.2, .5, .6)
+#make all circles
+for (i in c(.1,.3,.5,.8,1)) {
+  curve(topCircleMaker(x, radius = i), xlim = c(-i,i), add = TRUE, col = "red" , lwd = 2)
+  curve(-topCircleMaker(x, radius = i), xlim = c(-i,i), add = TRUE, col = "blue", lwd = 3)
+}
+
+#make green disc
+DiscMaker(.2, -.5, -.05 , col = "green")
+#make point inthe middle
+points(0,0, pch = 4)
+```
+
+
+\newpage
+
+## PROBLEMS
+
+3. Use rnorm to generate a (simulated) random sample of 10000 values. Make six ( 2x3 ) density histograms (freq=FALSE) in one plotting region. Each histogram should be constructed using the same sample. However, they should use a different number bins (breaks = c(100,50,20,12,8,5) ).  
+Use a common scale on the x-axis for the histogram( xlim=c(-3,3) ). Use the statements in the parentheses as arguments in hist(). On top of each histogram, plot the dnorm curve.
+
+```{r out.height=400, fig.width=9, fig.height=6}
+breaks = c(100,50,20,12,8,5)
+dist = rnorm(10000, mean = 0, sd =1)
+par(mfrow = c(2,3))
+for(i in 1:length(breaks)) {
+  hist(dist, breaks = breaks[i], freq = FALSE, xlim = c(-3,3))
+  curve(dnorm(x), xlim = c(-3,3), add = TRUE , col = "red")
+}
+```
+
+\newpage
+
+4. Make a 1x3 plotting region with the following plots:
+a. In the left region, plot the absolute value function and square root functions. Use x values between -1 and 1. Use y values between 0 and 1. 
+b. In the middle region, plot sine and cosine. Use x values between 0 and 3. Use y values between -1 and 1. 
+c. In the right region, plot the exponential function and its inverse. Use x values between 0 and 3. Use y values between -1 and 3.
+
+Make each curve a different color.
+Add a horizontal and a vertical axis to each. Position the vertical and horizontal axes at zero.
+
+```{r fig.height=3, fig.width=8 , out.width=600}
+
+par(mfrow = c(1,3))
+
+
+#set margins
+par(mar = c(2,5,5,2))
+#plotting region
+plot.new()
+#set up coordinate
+plot.window(xlim = c(-1,1), ylim = c(-1,1))
+#axises
+axis(1, at = -1:1, labels = -1:1, pos = 0, las = 1)
+axis(2, at = -1:1, labels = -1:1 , pos = 0, las = 2)
+#curves
+curve(abs(x), xlim = c(-1,1), ylim = c(0,1), add = TRUE , col = "blue")
+curve(sqrt(x), xlim = c(-1,1), ylim = c(0,1), add = TRUE , col = "red")
+
+#set margins
+par(mar = c(2,5,5,2))
+#plotting region
+plot.new()
+#set up coordinate
+plot.window(xlim = c(0,3), ylim = c(-1,1))
+#axises
+axis(1, at = 0:3, labels = 0:3, pos = 0, las = 1)
+axis(2, at = -1:1, labels = -1:1 , pos = 0, las = 2)
+#curves
+curve(sin(x), xlim = c(0,3), ylim = c(-1,1), add = TRUE , col = "green")
+curve(cos(x), xlim = c(0,3), ylim = c(-1,1), add = TRUE , col = "orange")
+
+#set margins
+par(mar = c(2,5,5,2))
+#plotting region
+plot.new()
+#set up coordinate
+plot.window(xlim = c(0,3), ylim = c(-1,3))
+#axises
+axis(1, at = 0:3, labels = 0:3, pos = 0, las = 1)
+axis(2, at = -1:3, labels = -1:3 , pos = 0, las = 2)
+#curves
+curve((x^2)+1, xlim = c(0,3), ylim = c(-1,3), add = TRUE , col = "black")
+curve(sqrt(x)-1, xlim = c(0,3), ylim = c(-1,3), add = TRUE , col = "grey")
+
+
+
+
+```
+
+
+
+
+\newpage
+
+5. Draw a stick individual standing on a boat in some water. There should be waves in the water. They should have a name tag on.
+```{r  fig.height=4, fig.width=4 , out.width=400}
+
+#set margins
+par(mar = c(2,5,5,2))
+#new plotting region
+plot.new()
+# set up coordinate system
+plot.window(xlim = c(0,12), ylim = c(0,10), asp = 1)
+#make axises
+axis(1 , pos = -1, at = 0:12, labels = -6:6 )
+axis(2 , pos = -1, at = 0:10, labels = 0:10)
+
+
+segments(6,4, 6,7.5, lwd = 4)
+segments(3.3,5, 6,7.5, lwd = 4)
+segments(8.7,5, 6,7.5, lwd = 4)
+segments(6,4, 3.7,2, lwd = 4)
+segments(6,4, 8.3,2, lwd = 4)
+
+DiscMaker(1.1, 6, 8.5)
+
+polygon(c(3,5,7,9) , c(2,1,1,2) , col = "brown")
+
+curve(cos(x)+.1, xlim = c(1,11), ylim = c(0,12), add = TRUE , col = "blue", lwd = 2)
+curve(cos(2*x)+.1, xlim = c(1,11), ylim = c(0,12), add = TRUE , col = "blue", lwd = 2)
+curve(cos(x)+1.1, xlim = c(1,11), ylim = c(0,12), add = TRUE , col = "blue", lwd = 2)
+curve(cos(2*x)+2.1, xlim = c(1,11), ylim = c(0,12), add = TRUE , col = "blue", lwd = 2)
+
+text(6,7.25, "NAME" , pos = 1, col = "red", cex = .75)
+
+```
+
+

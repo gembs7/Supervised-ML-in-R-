@@ -1,0 +1,245 @@
+---
+title: 'Lab #11'
+author: "Nick Gembs"
+date: "12/07/2020"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Make sure your final output looks nice. Control your graphs. Put them in the same plotting region, if that makes it more presentable.
+
+## Examples
+
+
+
+1. Simulate the results of rolling a fair 6-sided die 50 times. Determine how many times each number occurred. If a number is not rolled, it should still have a column, indicating zero rolls.
+
+```{r}
+
+samp = sample(1:6 , 50 , replace = T)
+Obs = table(samp)
+if (length(Obs)=6) {
+  Obs = c(Obs , rep(0, 6-length(Obs)))
+}
+Obs
+```
+
+
+2. If a fair die is rolled 50 times, how many times would you expect to roll a 1? How about a 2?  How about a three? etc. Make a single variable **Exp** to hold the most precise version of this number possible.
+
+```{r}
+
+Exp = 50/6
+```
+
+
+3. Compute the chi-square test statistic, sum((O-E)^2/E). Remember, O is the number of observation of each side of the die, and E is the expected number of occurrences of each side.
+
+```{r}
+
+testStat = sum((Obs-Exp)^2/Exp)
+testStat
+```
+
+
+4. Use the chisq.test function to compute the chi-square test statistic,  sum((O-E)^2/E).  Extract the number. (Set correct equal to FALSE. You will want to use the str function to determine where it is. )
+
+```{r}
+
+results = chisq.test(Obs, correct = F)
+str(results)
+testStat = results$statistic
+```
+
+
+5. Repeat this process 4000 times. Store the results.
+
+```{r}
+
+reps = 4000
+holder = rep(NA, reps)
+for(i in 1:reps) {
+  samp = sample(1:6 , 50 , replace=T, prob = rep(1/6, 6))
+  Obs = table(samp)
+  if (length(Obs)<6){
+    Obs = c(Obs , rep(0, 6-length(Obs)))
+  }
+  results = chisq.test(Obs, correct = F)
+  holder[i] = results$statistic
+}
+
+```
+
+
+6. Create a histogram based on the results from the results from the previous question. Overlay several chi-square density curves on the histogram. Use integer degrees of freedom, decide which matches the best.
+
+```{r}
+hist(holder, main = "Chi-squared teststats", freq = F)
+curve(dchisq(x, df=5), from = 0, to = 25, add=T)
+```
+
+
+## Homework
+
+7. Create at least six more histograms as you did above, with one difference. The simulated die that is being rolled should be unfair. Each should be unfair in a manner that is not a rearrangement of probabilities. This means that if one unfair die is c(2/6,1/6,1/6,1/6,1/12,1/12), you can not use c(1/6,2/6,1/6,1/6,1/12,1/12), c(1/6,1/6,2/6,1/6,1/12,1/12), etc. Try some that are only slightly unfair, (typing in decimals will be easier) and some that are very unfair (some sides have very small chances of occurring.) Overlay the curve you decided upon from question 7. It is alright if it is cut off. Make the main title of each graph the probabilities used.
+
+```{r}
+par(mfrow = c(2,3))
+
+reps = 4000
+holder = rep(NA, reps)
+for(i in 1:reps) {
+  samp = sample(1:6 , 50 , replace=T, prob = c(1/3, 1/6, 1/6, 1/6, 1/6, 0))
+  Obs = table(samp)
+  if (length(Obs)<6){
+    Obs = c(Obs , rep(0, 6-length(Obs)))
+  }
+  results = chisq.test(Obs, correct = F)
+  holder[i] = results$statistic
+}
+hist(holder, freq = F, main = "(1/3, 1/6, 1/6, 1/6, 1/6, 0)")
+curve(dchisq(x, df = 5) , from = 0 , to = 25 , add = T)
+
+reps = 4000
+holder = rep(NA, reps)
+for(i in 1:reps) {
+  samp = sample(1:6 , 50 , replace=T, prob = c(1/12, 1/2, 1/12, 1/6, 1/6, 0))
+  Obs = table(samp)
+  if (length(Obs)<6){
+    Obs = c(Obs , rep(0, 6-length(Obs)))
+  }
+  results = chisq.test(Obs, correct = F)
+  holder[i] = results$statistic
+}
+hist(holder, freq = F, main = "1/12, 1/2, 1/12, 1/6, 1/6, 0)")
+curve(dchisq(x, df = 5) , from = 0 , to = 25 , add = T)
+
+reps = 4000
+holder = rep(NA, reps)
+for(i in 1:reps) {
+  samp = sample(1:6 , 50 , replace=T, prob = c(1/100, 29/100, 20/100, 20/100, 20/100, 10/100))
+  Obs = table(samp)
+  if (length(Obs)<6){
+    Obs = c(Obs , rep(0, 6-length(Obs)))
+  }
+  results = chisq.test(Obs, correct = F)
+  holder[i] = results$statistic
+}
+hist(holder, freq = F, main = "(1/100, 29/100, 20/100, 20/100, 20/100, 10/100)")
+curve(dchisq(x, df = 5) , from = 0 , to = 25 , add = T)
+
+reps = 4000
+holder = rep(NA, reps)
+for(i in 1:reps) {
+  samp = sample(1:6 , 50 , replace=T, prob = c(.1 , .1, .1, .1 , .1, .5))
+  Obs = table(samp)
+  if (length(Obs)<6){
+    Obs = c(Obs , rep(0, 6-length(Obs)))
+  }
+  results = chisq.test(Obs, correct = F)
+  holder[i] = results$statistic
+}
+hist(holder, freq = F, main = "(.1 , .1, .1, .1 , .1, .5)")
+curve(dchisq(x, df = 5) , from = 0 , to = 25 , add = T)
+
+reps = 4000
+holder = rep(NA, reps)
+for(i in 1:reps) {
+  samp = sample(1:6 , 50 , replace=T, prob = c(.9, .09, .009, .0009, .00009, .00001))
+  Obs = table(samp)
+  if (length(Obs)<6){
+    Obs = c(Obs , rep(0, 6-length(Obs)))
+  }
+  results = chisq.test(Obs, correct = F)
+  holder[i] = results$statistic
+}
+hist(holder, freq = F, main = "(.9, .09, .009, .0009, .00009, .00001)")
+curve(dchisq(x, df = 5) , from = 0 , to = 25 , add = T)
+
+reps = 4000
+holder = rep(NA, reps)
+for(i in 1:reps) {
+  samp = sample(1:6 , 50 , replace=T, prob = c(1/5, 1/5, 1/5, 1/10, 3/20, 3/20))
+  Obs = table(samp)
+  if (length(Obs)<6){
+    Obs = c(Obs , rep(0, 6-length(Obs)))
+  }
+  results = chisq.test(Obs, correct = F)
+  holder[i] = results$statistic
+}
+hist(holder, freq = F, main = "(1/5, 1/5, 1/5, 1/10, 3/20, 3/20)")
+curve(dchisq(x, df = 5) , from = 0 , to = 25 , add = T)
+```
+
+
+8. Watch and record the first 50 rolls of the white die being rolled. Create a table of results.
+
+```{r}
+
+rolls = c(5,1,3,6,3,1,2,3,6,3,6,4,5,3,5,6,6,5,2,2,6,3,3,6,2,6,3,5,5,6,6,3,3,3,6,4,6,6,5,6,5,3,5,2,2,4,2,3,4)
+obs = table(rolls)
+obs
+```
+
+
+
+9. A die is either a fair die or an unfair die. Which is it? Explain. 
+
+```{r}
+probs = obs/50
+probs
+
+
+reps = 4000
+holder = rep(NA, reps)
+for(i in 1:reps) {
+  samp = sample(1:6 , 50 , replace=T, prob = probs)
+  Obs = table(samp)
+  if (length(Obs)<6){
+    Obs = c(Obs , rep(0, 6-length(Obs)))
+  }
+  results = chisq.test(Obs, correct = F)
+  holder[i] = results$statistic
+}
+hist(holder, freq = F, main = "50 Die Rolls Chisq")
+curve(dchisq(x, df = 5) , from = 0 , to = 25 , add = T)  
+  
+  
+```
+  
+With only 50 data points, the die is not fair because the chisq distribution of the die rolls does not fit a normal chisq distribution with 5 degrees of freedom. 
+
+  
+10. Using more rolls should make you more confident in your response to the previous problem. Using all the rolls on the video, answer the previous question again. Explain your answer. You may need to modify some of the previous result, and modify some graphs. 
+
+```{r}
+
+morerolls = c(5,1,3,6,3,1,2,3,6,3,6,4,5,3,5,6,6,5,2,2,6,3,3,6,2,6,3,5,5,6,6,3,3,3,6,4,6,6,5,6,5,3,5,2,2,4,2,3,4,2,2,4,5,3,6,3,2,6,6,6,6,5,5,5,3,6,6,6,2,6,6,2,3,4,6,6,5,6,6,5,3,3,5,5,5,1,6,3,1,2,6,1,6)
+obs = table(rolls)
+
+probs = obs/94
+probs
+
+
+reps = 4000
+holder = rep(NA, reps)
+for(i in 1:reps) {
+  samp = sample(1:6 , 50 , replace=T, prob = probs)
+  Obs = table(samp)
+  if (length(Obs)<6){
+    Obs = c(Obs , rep(0, 6-length(Obs)))
+  }
+  results = chisq.test(Obs, correct = F)
+  holder[i] = results$statistic
+}
+hist(holder, freq = F, main = "50 Die Rolls Chisq")
+curve(dchisq(x, df = 5) , from = 0 , to = 25 , add = T)
+
+```
+The die is not fair because the chisq distribution of the die rolls does not fit a normal chisq distribution with 5 degrees of freedom.
+
+
+  

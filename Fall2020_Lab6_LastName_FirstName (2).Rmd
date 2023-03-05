@@ -1,0 +1,170 @@
+---
+title: "Lab #6"
+subtitle: "Lab Section HeRE"
+author: "YOUR NAME HERE"
+date: "8/88/2088"
+output:
+  word_document: default
+
+---
+
+
+## Examples
+
+This code is to be used in the examples. This is the code that was created in the examples from Lab #5.
+
+
+
+
+```{r , echo=TRUE}
+#Addem is a function that will add together the elements of a vector
+#Addem takes a single argument X with a default value of 0
+Addem<-function( X = 0 ){
+  total<-0
+  for(i in X){
+    total<-total+i
+  }
+  return(total)
+}
+
+
+# SimulateDieRollMatrix is a function that simulates rolling a fair die with at least 2 sides.
+# SimulateDieRollMatrix will produce a matrix with ROLLS * REPETITIONS values.
+# Each column will hold the results of rolling a simulated die ROLLS number of times.
+# There will be REPETITIONS columns. For example, you want to roll a die 10 times, and record the resuls. 
+# This will constitute a single column. Suppose you want to repeat this 3 times. Then you will have three columns, each of ten rolls.
+# SimulateDieRollMatrix takes three arguments. SIDES is the number of sides on the die. ROLLS is the number of rolls. 
+# REPETITIONS is the number of times you repear making ROLLS rolls.
+SimulateDieRollMatrix<-function( REPETITIONS , ROLLS , SIDES = 2 ){
+  die<-1:SIDES
+  totalRolls <- ROLLS*REPETITIONS
+  dieMat <- matrix( NA ,nrow=ROLLS,ncol=REPETITIONS)
+  for( i in 1:REPETITIONS){
+    outcomes <- sample(die , size=ROLLS , replace=TRUE)
+    dieMat[,i] <- outcomes
+    }
+  return(dieMat)
+}
+
+# ADDCOLS is a function that takes each column of a matrix, sums the elements, and returns a vector with these sums.
+# The function takes 3 arguments
+# MATRIX is the matrix whose rows need to be added together
+# NROW is the number of rows in MATRIX
+# NCOL is the number of columns in MATRIX
+ADDCOLS<-function(MATRIX,NROW,NCOL){
+  ADDED<-rep(NA,times=NCOL)
+  for(i in 1:NCOL){
+    ADDED[i]<-Addem(MATRIX[,i])
+  }
+  return(ADDED)
+}
+
+
+```
+ 
+
+ 
+1. Create a function called **HISTROLLS**. **HISTROLLS** creates a histogram. The histogram will approximate the distribution of the sum of rolling a **SIDES** sided fair die **ROLLS** number of times. **SIDES** and **ROLLS** are two arguments. **REPETITIONS** will be the third argument. It will determines the number of sums that will be used in creating the histogram. 
+
+```{r fig.height=5, fig.width=5, out.width=200, echo=TRUE}
+
+
+```
+ 
+
+ 
+2. Create a function called **GRAPHS**. **GRAPHS** will produce a series of histograms. Each histogram will represent the distribution of summing the results of rolling a **SIDES** sided die **ROLLS** number of times. The histograms will appear side-by-side. It will take 4 arguments. **SIDES** which details the number of sides on the simulated die. **ROLLS** is a vector containing the number of times the simulated die is rolled.
+ 
+```{r fig.height=4, fig.width=12, out.width=400, echo=TRUE}
+
+
+```
+
+ 
+3. CHANGE **eval=FALSE** in the next code chunk to **eval=TRUE** once you have completed the previous examples.
+ 
+```{r fig.width=12,fig.height=4,out.width=400, echo=TRUE, eval=FALSE}
+GRAPHS( REPETITIONS=3000 ,  ROLLS=c(2,4,6) , SIDES=8    )
+```
+
+
+\newpage
+
+## Problems
+
+Each Problem is a modified version of the examples given in lab.  The following code is MY version of the answers for Lab #5. It is not YOUR version of the answers for lab#5.  You may use my code for Lab #6, or you may use your version. If you want to use your code from Lab #5, delete my code. If you want to use mine for Lab #6, that is fine also. Your answers for Lab #5 should be your work, and not mine. 
+
+
+```{r , echo=TRUE}
+
+
+AverageM<-function( X = 0 ){
+  n<-length(X)
+  average<-Addem(X)/n
+  return(average)
+}
+
+SIMBUCKETS<-function(REPETITIONS, BALLSELECTED, DIST="uniform"){
+  set.seed(1)
+  ballMat<-matrix(NA, nrow = BALLSELECTED , ncol = REPETITIONS)
+    for(i in 1:REPETITIONS){  
+      if(DIST=="uniform"){
+        outcomes<-runif(BALLSELECTED)
+      }else {
+        outcomes<-rchisq( BALLSELECTED , df = 4.3 )
+      }
+      ballMat[,i]<-outcomes
+    }
+  return(ballMat)
+}
+
+
+EX<-SIMBUCKETS(3,2,DIST="uniform")
+EX
+
+AverageCOLS<-function(MATRIX,NROW,NCOL){
+  AVE<-rep(NA,times=NCOL)
+  for(i in 1:NCOL){
+    AVE[i]<-AverageM(MATRIX[,i])
+  }
+  return(AVE)
+}
+
+RESULTS<-AverageCOLS( EX , NROW = 2, NCOL = 3)
+RESULTS
+
+```
+
+\newpage
+
+4. Make a function called **HISTDIST**. It should take three arguments:**NROWS**, **NCOLS**, **DIST**.  **HISTDIST** should create a histogram of the averages of the columns of a  **NROWS** by **NCOLS** matrix from a given distribution. Use the previous distribution options for **DIST**:  "chisq2" or "uniform". Enter two extra arguments into the hist() command beyond just the vector of averages. The first extra argument is called **xlim**. It will depend on **DIST** It should be set to c(0,10)  for **DIST**= "chisq2",  and c(0,1) for **DIST** = "uniform". (Use an if else statement)The second extra argument should be breaks=40. This will be the same regardless of the option for **DIST**. 
+
+```{r fig.height=3,fig.width=4,out.height=200, echo=TRUE}
+
+
+
+```
+ 
+
+
+5. Make a function **GRAPHDISTS**. It should take three arguments: **REPETITIONS**, **BALLSSELLECTED**, **DIST**. **REPETITIONS** should have a default value of 2000. **BALLSSELLECTED** should default to c(10,20,30). **DIST** should default to "uniform".  **GRAPHDISTS** should produce a series of histograms. Each histogram should simulate the distribution of the averates of selected **BALLSSELLECTED** numbered balls from a bucket of numbered balls labeled **DIST**. Each histogram should be created using a different element from **BALLSSELLECTED**. Reset the plotting region to 1x1 at the end of this.
+
+
+```{r fig.height=3,fig.width=12,out.height=200, echo=TRUE}
+
+```
+
+
+
+6. At the end, you should be able to run these three lines of code, and produce 3 plots with 6 histograms each. REMOVE the command eval=FALSE when you are ready to knit.
+
+```{r fig.height=3,fig.width=12,out.height=200, echo=TRUE, eval=FALSE}
+GRAPHDISTS(REPETITIONS = 2000 , BALLSSELLECTED = c(1,2,5,10) , DIST = "uniform" )
+GRAPHDISTS(REPETITIONS = 2000 , BALLSSELLECTED = c(1,2,5,10) , DIST = "chisq2" )
+
+```
+
+ 
+
+
+

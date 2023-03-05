@@ -1,0 +1,169 @@
+---
+title: "STSCI4740 HW3"
+author: "Nick Gembs"
+date: "10/10/2022"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r}
+#3
+```
+
+
+```{r}
+library(ISLR)
+
+data = data.frame(Auto)
+data
+```
+
+
+
+```{r}
+#a
+
+median = median(data$mpg)
+
+mpg01 = c()
+
+for (i in 1:length(data$mpg)) {
+  if (data$mpg[i] > median){
+    mpg01[i] = 1
+  } else {
+    mpg01[i] = 0
+  }
+}
+
+data$mpg01 = mpg01
+
+```
+
+
+```{r}
+#b
+
+plot(data$displacement, data$mpg01)
+plot(data$horsepower, data$mpg01)
+plot(data$weight, data$mpg01)
+plot(data$acceleration, data$mpg01)
+
+
+boxplot(data$mpg01, data$origin, xlab = "mpg01", ylab = "origin")
+boxplot(data$mpg01, data$year, xlab = "mpg01", ylab = "year")
+boxplot(data$mpg01, data$cylinders, xlab = "mpg01", ylab = "cylinders")
+
+
+print("It appears that the features cylinders, displacement, horsepower, weight, acceleration, year, and origin all have some degree of correlation with mpg01")
+```
+
+```{r}
+#c
+
+set.seed(2)
+train = sample(length(data$mpg01), length(data$mpg01)/2)
+
+training = data[train,]
+testing = data[-train,]
+
+```
+
+
+
+```{r}
+#d
+
+# Linear Discriminant Analysis
+
+library(MASS)
+lda.fit=lda(mpg01~cylinders+displacement+horsepower+weight+acceleration+year,data=training)
+lda.fit  
+lda.pred=predict(lda.fit, data=testing)
+names(lda.pred)
+lda.class=lda.pred$class
+table(lda.class,testing$mpg01)
+mean(lda.class==testing$mpg01)
+
+cat("Testing Error Rate is:" , 1-mean(lda.class==testing$mpg01))
+
+```
+
+```{r}
+#e
+
+# Quadratic Discriminant Analysis
+
+library(MASS)
+qda.fit=qda(mpg01~cylinders+displacement+horsepower+weight+acceleration+year,data=training)
+qda.fit  
+qda.pred=predict(qda.fit, data=testing)
+names(qda.pred)
+qda.class=qda.pred$class
+table(qda.class,testing$mpg01)
+mean(qda.class==testing$mpg01)
+
+cat("Testing Error Rate is:" , 1-mean(qda.class==testing$mpg01))
+```
+
+
+```{r}
+#f
+
+#Logistic Regression
+
+glm.fit=glm(mpg01~cylinders+displacement+horsepower+weight+acceleration+year,data=training)
+glm.probs=predict(glm.fit,data=testing,type="response")
+glm.pred=rep(0,length(testing$mpg01))
+glm.pred[glm.probs>.5]=1
+
+table(glm.pred,testing$mpg01)
+mean(glm.pred==testing$mpg01)
+
+cat("Testing Error Rate is:" , 1-mean(glm.pred==testing$mpg01))
+```
+
+
+```{r}
+#g
+
+library(e1071)
+library(caTools)
+library(caret)
+
+
+nb.fit=naiveBayes(mpg01~cylinders+displacement+horsepower+weight+acceleration+year,data=training)
+nb.fit  
+nb.pred=predict(nb.fit, newdata=testing)
+
+table(nb.pred,testing$mpg01)
+mean(nb.pred==testing$mpg01)
+
+cat("Testing Error Rate is:" , 1-mean(nb.pred==testing$mpg01))
+```
+
+
+
+```{r}
+#h
+
+# K-Nearest Neighbors
+
+library(class)
+ 
+knn.pred=knn(training[,2:6],testing[,2:6],training[,10],testing[,10],k=1)
+table(knn.pred,testing$mpg01)
+
+mean(knn.pred==testing$mpg01)
+
+cat("Testing Error Rate is:" , 1-mean(knn.pred==testing$mpg01))
+
+knn.pred=knn(training[,2:6],testing[,2:6],training[,10],testing[,10],k=9)
+table(knn.pred,testing$mpg01)
+mean(knn.pred==testing$mpg01)
+
+cat("Testing Error Rate is:" , 1-mean(knn.pred==testing$mpg01), "\n")
+
+print("K=9 appears to be the best K value because it minimizes testing error.")
+```
+

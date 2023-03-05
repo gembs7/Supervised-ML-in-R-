@@ -1,0 +1,210 @@
+---
+title: "Lab-HW-13"
+author: "Nick Gembs"
+date: "5/7/2021"
+output: word_document
+---
+
+
+##Problem #1: A rental car company wants to determine if the color of car (red , blue , white , black) effects the length of a car rental (days). Over a period of time, they randomly selected a customer, and randomly assigned one of the four colors. The responses can be cound in Carrentals.csv. (Mont)
+
+1.Is there evidence to support a claim that the color affects the length of a rental? α=0.05
+```{r}
+library(MASS)
+rentals <- read.csv("C:/Users/Nick/Downloads/carrentals.csv")
+rentals <- stack(rentals)
+names(rentals) <- c("length", "color")
+
+rentals.aov <- aov(length~color, data = rentals)
+rentals.sum <- summary(rentals.aov)
+rentals.sum
+
+```
+	Based on these results, we do not have any evidence of an association between car color and length of car rental, the p-value is .358>.05.
+	
+	
+2.Identify which colors have a statistically significant difference, if any. Compute an estimate for those differences with 90% confidence, adjusting for the multiple comparisons.
+	
+```{r}
+
+#Tukey's method
+rentals.tukey <- TukeyHSD(rentals.aov, conf.level = .9)
+rentals.tukey
+plot(rentals.tukey)
+```
+	
+3.Below you will find a complete set of orthogonal contrasts. Interpret each.
+
+
+```{r}
+contrasts(rentals$color)
+levels(rentals$color)
+contrast.1<-c(.5,.5,-.5,-.5) #colorful vs. neutral
+contrast.2<-c(1,-1,0,0) #red vs blue
+contrast.3<-c(0,0,1,-1) #white vs black
+contrast.all<-cbind(contrast.1,contrast.2,contrast.3)
+contrast.all
+```
+
+
+
+4.	Below, you will find the aggregated sample mean rental length for each color of car. Use give point estimates for the value of each contrast.
+```{r}
+rm(mean)
+mns <- aggregate(length~color, data=rentals, FUN = mean)
+mns
+mns$length%*%contrast.all
+
+```
+
+5. e.	Are any of the contrast statistically different from zero?
+
+```{r}
+#Just do it component wise error rate.
+contrasts(rentals$color)<-contrast.all
+rentals.aov<-aov(length~color,data=rentals)
+summary(rentals.aov,split=list(color=list("ColorVsBW"=1,"RVsB"=2,"BVsW"=3) ) )
+
+```
+None of these appear to be statistically significant, the closest is black vs white. 
+
+6.	Does this appear to meet the assumptions? (Same assumptions as linear regression, since it is linear regression.)
+```{r}
+plot(rentals.aov)
+```
+Seems to meet all the assumptions
+
+\newpage
+
+2. A drug company wants to investigate the bioactivity of a new drug. A completely randomize single factor experiment was conducted. Three different dosages of the drugs are easy to manufacture within the possible dosages of interest. The results are listed in the file Dosage.csv.(Mont)
+	
+	1. Does there appear to be a significant mean bioactivity difference among the three dosages? α=.01
+```{r}
+Dosage <- read.csv("C:/Users/Nick/Downloads/Dosage.csv")
+names(Dosage)[1] <- "g20"
+
+
+dat1 <- data.frame(Dosage$g20 , Dosage$g30, Dosage$g40)
+dat <- stack(dat1)
+colnames(dat) <- c("bio", "dosage")
+dat
+
+anova_results <- aov(bio ~ dosage, data = dat)
+summary(anova_results)
+
+
+ft1v2 <- c(1, -1, 0)
+ft1v3 <- c(-1, 0, 1)
+ft2v3 <- c(0, 1, -1)
+Contr <- cbind(ft1v2, ft1v3, ft2v3)
+
+contrasts(dat$dosage) <- Contr
+contrast_results <- aov(bio ~ dosage, data = dat)
+
+summary(contrast_results, split = list(dosage = list(`1v2` = 1, `1v3` = 2, `2v3` = 3)))
+
+```
+	Only using the first overall aov test, here does not appear to be a significant mean bioactivity difference among the three dosages because the p-value is .0145>.01. However, when split into contrasts, it appears that there is a significant difference between the means of treatment 1 and treatment 3 because the p-value is 0.00896<.01
+	
+	2.For any pair of means that appear to be different, compute an estimate of the difference with 99% confidence, adjusting for the multiple comparisons?
+```{r}
+
+tukey.results <- TukeyHSD(contrast_results, ordered = TRUE, conf.level = 0.99)
+tukey.results
+```
+The difference between g40 and g20 dosage with 99% confidence has an upper bound of 30.35949 and a lower bound of -.3594856.
+	
+	
+	3.Does this appear to meet the assumptions? (Same assumptions as linear regression, since it is linear regression.)
+```{r}
+plot(tukey.results)
+plot(contrast_results)
+```
+This does appear to meet the assupmtions as the residuals appear to be evenly spread, the variance appears to be constant, the residual-fitted and scale location plots are generally flat, and the qqplot appears to be linear.
+
+\newpage
+
+3.Three brands of AA batteries were being studied to determine if they have the different lifetimes (weeks) . The relevent data is collected in the Batteries.csv file. (Mont)
+Brands 1 and Brand 2 are supposedly made by the Acme Co., and simply have different brand names. Brand 3 is made by a different company, Gump Co.
+	
+	
+1.Is there evidence of a difference in the average battery lifetime of the different types? Inspect the dataset once you import it. You may need to chage its layout, or change the type of a column. (α=0.05)
+```{r}
+Batteries <- read.csv("C:/Users/Nick/Downloads/Batteries.csv")
+names(Batteries)[1] <- "hundred"
+names(Batteries)[2] <- "brands"
+anova_results <- aov(hundred ~ brands, data = Batteries)
+summary(anova_results)
+
+```
+There is evidence that there is a difference in the average battery lifetime of the different times because the p-value is 9.03e-06<.05.
+	
+2.Construct a meaningful complete set of orthogonal contrasts. Indicate their meaning. Show that they are orthogonal. (Don’t forget to check the ordering of the factors before you construct any contrasts. You need your coefficients to be in the correct order for a contrast to be useful.)
+```{r}
+Batteries$brands <- as.factor(Batteries$brands)
+ft1v23 <- c(1, -.5, -.5) # Brand 1 vs brand 2 and brand 3
+ft1v3 <- c(0, 1, -1) # brand 2 vs brand 3
+Contr <- cbind(ft1v23, ft1v3)
+t(Contr) %*% Contr
+
+contrasts(Batteries$brands) <- Contr
+
+```
+	
+	
+3.Are any of these contrasts significant? α_e=0.05
+
+```{r}
+tukey.results <- TukeyHSD(contrast_results, ordered = TRUE, conf.level = 0.95)
+tukey.results
+
+contrast_results <- aov(hundred ~ brands, data = Batteries)
+
+summary(contrast_results, split = list(brands = list(`1v23` = 1, `1v3` = 2)))
+```
+Contrasts between brand 1 and brand 3 is significant.
+
+4.Does this appear to meet the assumptions? (Same assumptions as linear regression, since it is linear regression.)
+```{r}
+plot(contrast_results)
+```
+This does not appear to perfectly meet the assumptions as both the residualvsfitted and scale-location plots show residuals the are lower towards the end of the graph. Variance does not appear to be entirely consistant.
+
+
+\newpage
+
+Problem #4: An soil microbiology experiment was conducted to determine the effect of differing amount of fertilizer on the nitrogen fixation by a type of bacteria. The experiment used four types of crops, and three concentrations of fertilizer. Four replications of each treatment pair were used. At a certain point in the crops lifecycle, a measure of nitrogen fixation was taken. The results are in the Crops.csv data set. (Kuehl)
+
+
+1.	What type of treatment design is being used?
+
+```{r}
+Crops <- read.csv("C:/Users/Nick/Downloads/Crops.csv")
+```
+
+A Factorial treatment design is being used.
+
+2.	Create an interaction plot. Does there appear to be an interaction between the two factors.
+
+```{r}
+interaction.plot(Crops$Nitrogen, Crops$Crop, Crops$reduction)
+```
+There does appear to be an interaction between the two factors as the interaction plot lines do not appear to be parallel, indicating an interaction.
+
+3.	Does there appear to an interaction between the two factors? (Use a test.)
+
+```{r}
+
+anova_results <- aov(reduction ~ Nitrogen + Crop + Nitrogen:Crop,
+ data = Crops)
+summary(anova_results)
+
+```
+There does appear to be an interaction between the two factors as the p-value for the interaction is 3.26e-07<.05. Reject the null of no interaction and accept the hypothesis of an interaction between the factors.
+
+4.	What assumptions are not met? (Same assumptions as linear regression, since it is linear regression.)
+```{r}
+
+plot(anova_results)
+```
+First, since the scale-location plot has a positive slope, it appears that the variance is not constant across the fitted values. Also, the qq-plot is not entirely linear, as it has strong tail-offs at either end.

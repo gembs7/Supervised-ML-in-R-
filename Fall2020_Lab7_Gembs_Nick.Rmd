@@ -1,0 +1,159 @@
+---
+title: "Lab #7"
+subtitle: "Section 404"
+author: "Nick Gembs"
+date: "10/26/20"
+output:
+  word_document: default
+
+---
+
+
+## Examples
+
+1. Download the file PLANETFACTS. Load it into RStudio as a dataframe. Call the dataframe PLANETFACTS.
+
+```{r echo=TRUE}
+#USE THE IMPORT DATASET OPTION, TO IMPORT THE FILE. SET STRINGSASFACTORS TO FALSE. COPY/PASTE THE COMMAND FOR IMPORTING FROM THE CONSOLE.
+ 
+PlanetFacts <- read.csv("C:/Users/Nick/Downloads/PlanetFacts.csv", stringsAsFactors=FALSE)
+
+```
+
+
+2. The distances from the sun are missing from this dataset. Add a column DISTANCE to the dataframe PLANETFACTS. The distances are multiples of 106km. The distances are listed in the next code chunk.
+
+```{r echo=TRUE }
+#MERCURY,VENUS,EARTH,MARS,JUPITER,SATURN,URANUS,NEPTUNE,PLUTO
+# 57.9,108.2,149.6,227.9,778.6,1433.5,2872.5,4495.1,5906.4
+
+Distance = c(57.9,108.2,149.6,227.9,778.6,1433.5,2872.5,4495.1,5906.4)
+PlanetFacts = cbind(PlanetFacts, Distance)
+PlanetFacts
+```
+
+3. Change the names of the variables in your dataframe into something more managable with the names command.
+```{r echo=TRUE }
+#Giving the columns more informative names
+names(PlanetFacts) = c("Planet", "Mass", "Number of Moons", "Rings", "Type", "Distance")
+PlanetFacts
+```
+
+
+4. Replace the Yes/No values in the RINGS variable with TRUE=Yes and FALSE=No.
+
+```{r echo=TRUE }
+#Replacing RINGS as a logical vector. TRUE=RINGS FALSE=NO RINGS
+
+PlanetFacts$Rings = ifelse(PlanetFacts$Rings =="Yes", TRUE, FALSE)
+PlanetFacts
+```
+ 
+5. The summary command will summarize the data in the dataframe.
+```{r echo=TRUE}
+#A command that summarizes each column
+
+summary(PlanetFacts)
+
+```
+ 
+
+
+6. Create scatterplot of the MASS vs DISTANCE. Label each point with the name of its PLANET.
+```{r echo=TRUE, fig.height=4, fig.width=5 , out.height=300}
+
+plot(PlanetFacts$Mass , PlanetFacts$Distance)
+text(PlanetFacts$Mass, PlanetFacts$Distance , PlanetFacts$Planet)
+```
+
+
+7. The PLANET names are overlapping. Clean it up some.
+```{r echo=TRUE, fig.height=4, fig.width=5 , out.height=300}
+# A better-looking scatterplot
+ 
+plot(PlanetFacts$Mass, PlanetFacts$Distance, xlab = "Mass (1024kg)" , ylab = "Distance from the Sun (106 km)")
+text(PlanetFacts$Mass[6:9], PlanetFacts$Distance[6:9] , PlanetFacts$Planet[6:9], pos = 4, cex = .75)
+text(PlanetFacts$Mass[5], PlanetFacts$Distance[5] , PlanetFacts$Planet[5], pos = 2, cex = .75)
+text(PlanetFacts$Mass[2], PlanetFacts$Distance[2] , paste(PlanetFacts$Planet[1:4] , collapse = ","), pos = 4, cex = .75)
+```
+
+
+8. Make a horizontal boxplot of the distances.
+```{r echo=TRUE ,out.height=300}
+boxplot(Distance, data = PlanetFacts , horizontal = TRUE)
+```
+
+
+
+
+\newpage
+
+
+
+## Problems
+
+
+9. Download the file Leaves2020. Load it into RStudio as a dataframe. Call the dataframe LEAVES. Determine the unique data values in the quad and shape variables. There should only be two different values in each variable. If there are more than two uniques values, adjust the data values in that column
+
+```{r echo=TRUE}
+ Leaves2020 <- read.csv("C:/Users/Nick/Downloads/Leaves2020.csv", stringsAsFactors=FALSE)
+#THIS LINE WILL REPLACE THE "ART" VALUES WITH "ARTS" SO THAT EVERYTHING IS LABELED CONSISTENTLY.
+#Leaves2020$quad = ifelse (Leaves2020$quad == "ART" || "ARTS" , "ARTS", "AG")
+Leaves2020$quad[Leaves2020$quad =="ART"] = "ARTS"
+Leaves2020
+```
+
+10. Create a character vector called CATSIZE (categorical size). Each element will be a character string: "small", "medium", "large". An element will be "small" if its corresponding LEAVES\$length value is less than or equal to 10.5. An element will be "large" if its corresponding LEAVES\$length value is greater than 18.5. Otherwise, it should be "medium".
+
+```{r echo=TRUE}
+SIZE <- c("small", "medium", "large")
+
+CATSIZE <- rep ("medium", times = 566)
+
+CATSIZE[Leaves2020$length <= 10.5] = SIZE[1]
+CATSIZE[Leaves2020$length > 18.5] = SIZE[3]
+
+
+```
+
+11. Attach CATSIZE to the dataframe LEAVES as another column.
+
+```{r echo=TRUE}
+
+Leaves2020 = cbind(Leaves2020, CATSIZE)
+Leaves2020
+```
+
+
+12. Create a single plotting region that contains two histograms side by side. One histogram should be for the ARTS quad lengths. The other should be for the AG quad lengths. Label your graphs.
+
+```{r echo=TRUE, fig.height=4,fig.width=4,out.height=300}
+
+par(mfrow=c(1,2))
+hist(Leaves2020$length[Leaves2020$quad =="ARTS"], main = "Lengths of Leaves", xlab = "Leaves2020$length" )
+hist(Leaves2020$length[Leaves2020$quad =="AG"],  main = "Lengths of Leaves", xlab = "Leaves2020$length")
+
+```
+13. Make a qqplot of the AG quad lengths  on one axis and the ARTS quad length on the other.
+
+```{r echo=TRUE, fig.height=4,fig.width=4,out.height=300}
+
+qqplot(Leaves2020$length[Leaves2020$quad =="AG"], Leaves2020$length[Leaves2020$quad =="ARTS"] )
+#Uncomment the next line ( Remove #) if you would like to add the line Y=X to the plot.
+abline(0,1,col="red")
+```
+14. Make a single graph that contains two boxplots. One boxplot is for the ARTS lengths. The second boxplot is for the Ag lengths. Make them horizontal.
+
+```{r echo=TRUE, fig.height=4,fig.width=4,out.height=300}
+
+
+boxplot(Leaves2020$length ~ Leaves2020$quad)
+```
+
+
+15. Make a pair of mosaicplot, in the same plotting region, for examining the relationship between the quad variable and the CATSIZE variable.  Just switch the order of the variables. Add some color, if you like.
+
+```{r echo=TRUE, fig.height=4,fig.width=8,out.height=300}
+
+mosaicplot(~CATSIZE + Leaves2020$quad, Data = Leaves2020, col = c("red", "blue"))
+```

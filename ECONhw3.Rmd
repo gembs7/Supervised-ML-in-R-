@@ -1,0 +1,53 @@
+---
+title: "Econ3140HW4"
+author: "Nick Gembs"
+date: "3/6/2022"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r}
+#install.packages('haven')
+
+
+library(haven)
+
+data <- read_dta('C:/Users/Nick/Downloads/jtrain98.dta')
+data
+
+x1 <- data$train
+x2 <- data$earn96
+y <- data$earn98
+
+lmtot <- lm(y~x1+x2)
+lmtot
+
+lmy <- lm(y~x1)
+lmy
+
+lmx2tot <- lm(x2~x1+y)
+lmx2tot
+
+lmx2 <- lm(x2~x1)
+lmx2
+
+
+#cov(x1,x2)
+#var(x1)
+
+cov(x1,x2)/var(x1)
+
+
+cov(x1,y)
+var(x1)
+
+cov(x1,y)/var(x1)
+
+plot(x1,y)
+plot(x2,y)
+plot(x1,x2)
+
+
+```
+

@@ -1,0 +1,385 @@
+---
+title: "STSCI4740HW4"
+author: "Nick Gembs"
+date: "10/30/2022"
+output:
+  word_document: default
+  html_document: default
+---
+
+1.
+
+```{r}
+library(ISLR)
+data=Default
+```
+
+```{r}
+#glimpse(data)
+```
+
+```{r}
+#1
+
+mylogit <- glm(default ~ income + balance, data = data, family = "binomial")
+
+summary(mylogit)
+```
+
+```{r}
+#2
+
+set.seed(1)
+
+train = sample(length(data$default), length(data$default)/2)
+
+training = data[train,]
+testing = data[-train,]
+
+mylogit <- glm(default ~ income + balance, data = training, family = "binomial")
+
+logit.pred=predict(mylogit, data=testing)
+pred = (exp(logit.pred))/(1+exp(logit.pred))
+
+for( i in 1:length(pred)){
+  if (pred[i] > .5){
+  pred[i]  = "Yes"
+} else {
+  pred[i]  = "No"
+}
+}
+
+table(pred,testing$default)
+mean(pred==testing$default)
+
+cat("Testing Error Rate is:" , 1-mean(pred==testing$default))
+```
+
+
+```{r}
+#3
+
+set.seed(2)
+
+train = sample(length(data$default), length(data$default)/2)
+
+training = data[train,]
+testing = data[-train,]
+
+mylogit <- glm(default ~ income + balance, data = training, family = "binomial")
+
+logit.pred=predict(mylogit, data=testing)
+pred = (exp(logit.pred))/(1+exp(logit.pred))
+
+for( i in 1:length(pred)){
+  if (pred[i] > .5){
+  pred[i]  = "Yes"
+} else {
+  pred[i]  = "No"
+}
+}
+
+table(pred,testing$default)
+mean(pred==testing$default)
+
+cat("Testing Error Rate is:" , 1-mean(pred==testing$default))
+```
+
+
+```{r}
+set.seed(3)
+
+train = sample(length(data$default), length(data$default)/2)
+
+training = data[train,]
+testing = data[-train,]
+
+mylogit <- glm(default ~ income + balance, data = training, family = "binomial")
+
+logit.pred=predict(mylogit, data=testing)
+pred = (exp(logit.pred))/(1+exp(logit.pred))
+
+for( i in 1:length(pred)){
+  if (pred[i] > .5){
+  pred[i]  = "Yes"
+} else {
+  pred[i]  = "No"
+}
+}
+
+table(pred,testing$default)
+mean(pred==testing$default)
+
+cat("Testing Error Rate is:" , 1-mean(pred==testing$default))
+```
+
+
+```{r}
+print("After running the logistic regression on 3 different samples, the max validation error rate was .2036 and the minimum was .1372. It appears that the model is significantly better than random guessing, but does have noticeable variance among trials")
+```
+
+```{r}
+#4
+
+set.seed(1)
+options(contrasts = c("contr.treatment", "contr.helmert")) # dummy
+
+train = sample(length(data$default), length(data$default)/2)
+
+training = data[train,]
+testing = data[-train,]
+
+mylogit <- glm(default ~ income + balance + student, data = training, family = "binomial")
+
+logit.pred=predict(mylogit, data=testing)
+pred = (exp(logit.pred))/(1+exp(logit.pred))
+
+for( i in 1:length(pred)){
+  if (pred[i] > .5){
+  pred[i]  = "Yes"
+} else {
+  pred[i]  = "No"
+}
+}
+
+table(pred,testing$default)
+mean(pred==testing$default)
+
+cat("Testing Error Rate is:" , 1-mean(pred==testing$default))
+```
+
+
+```{r}
+options(contrasts = c("contr.treatment", "contr.helmert")) # dummy
+set.seed(2)
+
+train = sample(length(data$default), length(data$default)/2)
+
+training = data[train,]
+testing = data[-train,]
+
+mylogit <- glm(default ~ income + balance + student, data = training, family = "binomial")
+
+logit.pred=predict(mylogit, data=testing)
+pred = (exp(logit.pred))/(1+exp(logit.pred))
+
+for( i in 1:length(pred)){
+  if (pred[i] > .5){
+  pred[i]  = "Yes"
+} else {
+  pred[i]  = "No"
+}
+}
+
+table(pred,testing$default)
+mean(pred==testing$default)
+
+cat("Testing Error Rate is:" , 1-mean(pred==testing$default))
+```
+
+
+```{r}
+options(contrasts = c("contr.treatment", "contr.helmert")) # dummy
+set.seed(3)
+
+train = sample(length(data$default), length(data$default)/2)
+
+training = data[train,]
+testing = data[-train,]
+
+mylogit <- glm(default ~ income + balance +student, data = training, family = "binomial")
+
+logit.pred=predict(mylogit, data=testing)
+pred = (exp(logit.pred))/(1+exp(logit.pred))
+
+for( i in 1:length(pred)){
+  if (pred[i] > .5){
+  pred[i]  = "Yes"
+} else {
+  pred[i]  = "No"
+}
+}
+
+table(pred,testing$default)
+mean(pred==testing$default)
+
+cat("Testing Error Rate is:" , 1-mean(pred==testing$default))
+```
+```{r}
+print("After running the logistic regression on 3 different samples, the max validation error rate was .2124 and the minimum was .1478. It appears that the model is significantly better than random guessing, but does have noticeable variance among trials. It does not appear that the student variable was effective in predicting default. Including a dummy variable for student does not lead to a reduction in the test error rate")
+```
+
+```{r}
+#5
+
+
+library(caret)
+library(tidyverse)
+
+ctrl <- trainControl(method = "cv", number = 5)
+
+options(contrasts = c("contr.treatment", "contr.helmert")) # dummy
+
+mylogit <- train(default ~ income + balance, data = data, method = "glm", family = "binomial", trControl = ctrl)
+
+print(mylogit)
+logit.pred=predict(mylogit, data=testing)
+table(pred,testing$default)
+mean(pred==testing$default)
+
+cat("Testing Error Rate is:" , 1-mean(pred==testing$default) , "\n")
+
+mylogit <- train(default ~ income + balance + student, data = data, method = "glm", family = "binomial", trControl = ctrl)
+
+print(mylogit)
+logit.pred=predict(mylogit, data=testing)
+table(pred,testing$default)
+mean(pred==testing$default)
+
+cat("Testing Error Rate is:" , 1-mean(pred==testing$default))
+
+```
+
+
+```{r}
+print("5-fold cross-validation yields the same results, adding dummy variable student does not reduce test error in predicting default.")
+```
+
+
+```{r, eval = FALSE}
+
+#LOOCV
+
+ctrl <- trainControl(method = "LOOCV")
+
+options(contrasts = c("contr.treatment", "contr.helmert")) # dummy
+
+mylogit <- train(default ~ income + balance, data = data, method = "glm", family = "binomial", trControl = ctrl)
+
+print(mylogit)
+logit.pred=predict(mylogit, data=testing)
+table(pred,testing$default)
+mean(pred==testing$default)
+
+cat("Testing Error Rate is:" , 1-mean(pred==testing$default) , "\n")
+
+mylogit <- train(default ~ income + balance + student, data = data, method = "glm", family = "binomial", trControl = ctrl)
+
+print(mylogit)
+logit.pred=predict(mylogit, data=testing)
+table(pred,testing$default)
+mean(pred==testing$default)
+
+cat("Testing Error Rate is:" , 1-mean(pred==testing$default))
+```
+
+2.
+
+```{r}
+library(ISLR2)
+df=Boston
+```
+
+```{r}
+#df
+```
+
+```{r}
+#a
+
+
+mu_hat = mean(df$medv)
+mu_hat
+
+```
+
+```{r}
+# b
+
+standard_error = (sd(df$medv)/sqrt(length(df$medv)))
+
+standard_error
+
+print("With standard error being .4088611, it can be inferred that the majority of the data for medv fall between .4088611 of the sample mean 22.53281")
+```
+
+```{r}
+
+# c
+set.seed(9)
+library(boot)
+  
+m <- function(medv,i){mean(df$medv[i])}
+
+# Calculate standard error using 100
+# bootstrapped samples
+boot = boot(df$medv, m, 100)
+boot
+
+print("This answer is slightly larger than the result from b")
+```
+```{r}
+# d
+
+t.test(df$medv)
+
+cat("Bootstrap Confidence Interval: " , c(mu_hat - 2*.4143032 ,  mu_hat + 2*.4143032))
+
+print("Results are similar, bootstrap interval slightly wider")
+```
+
+
+```{r}
+# e
+
+median = median(df$medv)
+median
+```
+
+```{r}
+#f
+
+set.seed(9)
+library(boot)
+  
+m <- function(medv,i){median(df$medv[i])}
+
+# Calculate standard error using 100
+# bootstrapped samples
+boot = boot(df$medv, m, 100)
+boot
+
+print("Standard error is .4002537. This is similar to the bootstrap standard error for mean, but slightly lower.")
+
+```
+
+```{r}
+#g
+
+mu_hat_.01 = quantile(df$medv, probs = .1)
+
+(mu_hat_.01)
+
+
+```
+
+```{r}
+#h
+
+set.seed(9)
+library(boot)
+  
+m <- function(medv,i){(quantile(df$medv[i], probs = .1))}
+
+# Calculate standard error using 100
+# bootstrapped samples
+boot = boot(df$medv, m, 100)
+boot
+
+print("Standard error is .5477696. This is higher than the bootstrap standard error for mean and median.")
+
+```
+
+
+
+

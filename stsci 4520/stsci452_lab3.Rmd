@@ -1,0 +1,78 @@
+---
+title: "lab3"
+author: "Nick Gembs"
+date: "2/6/2023"
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+---
+---
+title: "lab3"
+author: "Nick Gembs"
+date: "2/6/2023"
+output: html_document
+---
+---
+title: ""
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+```{r load-packages, include=FALSE}
+library(dplyr)
+library(knitr)
+```
+# Exercises
+
+1. Use `apply` to compute column sums of the matrix in the first section.
+
+```{r}
+M <- matrix( 1:12, 4, 3 )
+colSums(M)
+apply(X = M, MARGIN = 2, FUN = sum)
+```
+
+
+2. Read in the airline data and use one of the apply functions to
+figure out how many missing values there are in each column of the
+airline data. Make sure the output is a named vector.
+
+```{r}
+dat = read.csv(
+  "C:/Users/Nick/Documents/GitHub/statcomp2023/datasets/airline_2019-07-01.csv")
+sapply(dat, function(x) sum(is.na(x)))
+```
+
+
+3.  Use tapply to compute a matrix holding the distances between 
+every pair of airports. You’ll have to read the documentation for tapply to see
+how to deal with multiple factors. Print out the rows and columns for the 10 
+airports with the most flights
+
+```{r}
+mat = matrix(data = 0, nrow = length(unique(dat$Origin)),
+             ncol = length(unique(dat$Origin)), 
+             dimnames = list(unique(dat$Origin),unique(dat$Origin)))
+
+mat1 = tapply(dat$Distance , list(dat$Origin, dat$Dest) , mean )
+
+flights = dat %>% group_by(Flights, Origin) %>% mutate(TotalFlights = n())
+
+flights = flights[!duplicated(flights[,15]),]
+
+flights = head(flights[order(flights$TotalFlights, decreasing=TRUE),], 10)
+
+flights[,c("Origin", "TotalFlights")]
+
+indices = c('ATL', 'ORD','DFW','DEN','CLT','LAX','SFO','IAH','PHX','LAS')
+
+mat1[indices,indices]
+
+```
+
+

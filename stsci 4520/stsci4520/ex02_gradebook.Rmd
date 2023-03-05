@@ -1,0 +1,213 @@
+---
+title: ''
+output:
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Stat Computing - Exercises 02 - Gradebook
+
+There is a dataset in `datasets/grade_book.csv` containing simulated
+grades for Statistical Computing. From the exercises directory, you
+can read in the dataset by running
+
+```{r}
+dat <- read.csv("../grade_book.csv")
+str(dat)
+```
+Complete the following exercises related to the grade book.
+
+1. Randomly generate with replacement a birth date for each student between
+   2001-01-01 and 2005-12-31. Print out how many unique birth dates there
+   are (year-month-date) and how many unique birthdays there are (month-date).
+   Is this surprising?
+```{r}
+dim(dat)
+
+bday = (as.Date(runif(50, min = 0, max = 1825), origin = as.Date("2001-01-01")))
+bdayshort = format(bday, format = "%m/%d")
+length(unique(bday))
+b = length(unique(bdayshort))
+b
+```
+
+There are 50 unique (year-month-date) birthdays and `r b` unique (month-date) 
+birthdays. This makes sense because there are 1825 unique birthday options with 
+year while only 365 without year.
+
+
+2. Add the birthdate column to the data frame in 3 different ways: using
+   `cbind`, `$`, and `[[]]`.
+```{r}
+way1 = cbind(dat,birthdate = bday)
+
+#way2
+dat$birthdate = bday
+
+#way3
+dat[["birthdate"]] = bday
+
+```
+
+
+3. Print out the column names.
+```{r}
+names(dat)
+```
+
+
+4. Remove the birthdate column and show that it's gone.
+```{r}
+dat$birthdate = NULL
+names(dat)
+```
+
+
+5. Print out which column number has the netIDs.
+```{r}
+which( names(dat)=="netID" )
+```
+
+
+6. Print out the column numbers that contain lab grades. You might find the
+   `grep` function useful.
+```{r}
+grep('lab', names(dat))
+```
+
+
+7. Print out the column numbers that contain exercise grades.
+```{r}
+grep('ex', names(dat))
+```
+
+
+8. What happens when you try to convert the data frame to a matrix with
+   `as.matrix`?
+```{r}
+matdat <- as.matrix(dat)
+```
+
+It automatically converts all of the data types to string because a matrix has 
+to have uniform data type.
+
+9. Extract the exercise columns and convert to a matrix. Why does this work as intended?
+```{r}
+datmat = as.matrix(dat[grep('ex', names(dat))])
+```
+
+This works as intended because the rule of uniform data type of a matrix is not 
+broken, so R does not auto convert.
+
+10. Add a column to the data frame containing each student's average exercise
+   grade.  Treat missing values as a grade of 0. You can do this in a couple of
+   lines with `rowSums` or `rowMeans`. Exercises are out of 20. Print out the average
+   exercise grades for the first 10 students.
+```{r}
+
+datmat <- replace(datmat, is.na(datmat), 0)
+
+5*rowMeans(datmat)[1:10]
+dat$exAVG = 5*rowMeans(datmat, na.rm =TRUE)
+```
+
+
+11. Calculate each student's exercise average again, this time using the
+    average of the non-missing values. Print out the average exercise grades
+    for the first 10 students.
+```{r}
+dat1 <- read.csv("../grade_book.csv")
+datmat = as.matrix(dat[grep('ex', names(dat1))])
+5*rowMeans(datmat, na.rm =TRUE)[1:10]
+
+
+```
+
+12. Print out the number of missing exercises for each exercise.
+```{r}
+dat1 <- read.csv("../grade_book.csv")
+datmat = as.matrix(dat1[grep('ex', names(dat1))])
+colSums(is.na(datmat))
+
+```
+
+
+13. Calculate each student's lab average, and add to the data frame. Labs are out of 10.
+    Print out the average lab grades for the first 10 students.
+```{r}
+
+datmat = as.matrix(dat[grep('lab', names(dat))])
+
+10*rowMeans(datmat, na.rm =TRUE)[1:10]
+
+#datmat <- replace(datmat, is.na(datmat), 0)
+dat$labAVG = 10*rowMeans(datmat, na.rm =TRUE)
+
+
+```
+
+
+14. Using the formula in the syllabus, add a column containing each student's
+    overall numeric grade. Treat missing assignments as 0. Project is out of 100.
+```{r}
+
+
+
+
+dat <- replace(dat, is.na(dat), 0)
+
+dat$numericgrade = dat$labAVG*.2 + dat$exAVG*.6 + dat$project*.2
+head(dat)
+
+```
+
+
+15. Using the guidelines in the syllabus, add a column containing each
+    student's letter grade.
+```{r}
+lam = c()
+for(i in 1:50){
+   if(dat[i,"numericgrade"] >= 93){
+      lam[i] = "A"
+   } else if (dat[i,"numericgrade"] >= 90){
+      lam[i] = "A-"
+   } else if (dat[i,"numericgrade"] >= 87){
+      lam[i] = "B+"
+   } else if (dat[i,"numericgrade"] >= 83){
+      lam[i] = "B"
+   } else if (dat[i,"numericgrade"] >= 80){
+      lam[i] = "B-"
+   } else if (dat[i,"numericgrade"] >= 77){
+      lam[i] = "C+"
+   } else if (dat[i,"numericgrade"] >= 73){
+      lam[i] = "C"
+   } else if (dat[i,"numericgrade"] >= 70){
+      lam[i] = "C-"
+   } else if (dat[i,"numericgrade"] >= 67){
+      lam[i] = "D+"
+   } else if (dat[i,"numericgrade"] >= 63){
+      lam[i] = "D"
+   } else if (dat[i,"numericgrade"] >= 60){
+      lam[i] = "D-"
+   } else {
+      lam[i] = "F"
+   }
+}
+
+dat$lettergrade = lam
+
+head(dat)
+```
+
+
+16. Print out the netID, numeric average, and letter grade for the top 10
+    scorers. You may want to look at the `order` function.
+
+```{r}
+tops = dat[order(dat$numericgrade, decreasing=TRUE),c("netID","numericgrade","lettergrade")]
+tops[1:10,]
+```
+

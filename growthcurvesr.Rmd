@@ -1,0 +1,180 @@
+---
+title: "Untitled"
+author: "Nick Gembs"
+date: "10/3/2022"
+output:
+  word_document: default
+  html_document: default
+---
+```{r}
+library("ggplot2")
+```
+
+```{r}
+df = read.csv("C:/Users/Nick/Documents/GrowthCurve ALZ 131 Data Analysis Excel ng.csv")
+
+```
+
+```{r}
+task1 = df[df[4] == 1,]
+task2 = df[df[4] == 2,]
+```
+
+```{r}
+lm.fit1 = lm(data = task1, correct ~ poly(CHILDAGE, degree=3, raw=T))
+lm.fit2 = lm(data = task2, correct ~ poly(CHILDAGE, degree=3, raw=T))
+summary(lm.fit1)
+summary(lm.fit2)
+```
+```{r}
+plot(task1$CHILDAGE, task1$correct, main = "Child correct vs Child Group for task 1: Cubic Overlay", xlab = "CHILD Group", ylab = "Correct Score", cex.main = .72)
+lines(sort(task1$CHILDAGE),                 # Draw polynomial regression curve
+      fitted(lm.fit1)[order(task1$CHILDAGE)],
+      col = "red",
+      type = "l")
+
+
+```
+
+```{r}
+plot(task2$CHILDAGE, task2$correct, main = "Child correct vs Child Group for task 2: Cubic Overlay", xlab = "CHILD Group", ylab = "Correct Score", cex.main = .72 )
+lines(sort(task2$CHILDAGE),                 # Draw polynomial regression curve
+      fitted(lm.fit2)[order(task2$CHILDAGE)],
+      col = "red",
+      type = "l")
+
+summary(lm.fit2)
+f=expression( 0.248512 + -0.141121*x + 0.04712*x*x -0.002894*x*x*x)
+
+exp = D(f,"x")
+exp
+exp1 = D(D(f,"x"),"x")
+exp1
+
+
+cc = function(x){0.248512 + -0.141121*x + 0.04712*x*x -0.002894*x*x*x}
+b = function(x){-0.141121 + 2*.04712*x - 3* (.002894*x^2)}
+
+
+curve(b, from=1, to=8, , main = "Derivative Plot for Task 2: Cubic Overlay", xlab = "CHILD Group", ylab = "Derivative", cex.main = 1, col = "red")
+points(x = 939479318196729/173101855700000, y = b(939479318196729/173101855700000), pch = 19, cex = 1)
+text(x = 939479318196729/173101855700000, y = b(939479318196729/173101855700000)-.02, labels = "Maximum: Group 5.42 ")
+
+
+```
+
+
+
+```{r}
+ggp <- ggplot(task1, aes(CHILDAGE, correct), title = "Child correct vs Child Group for task 1: Cubic Overlay") +    # Create ggplot2 scatterplot
+  geom_point()
+
+ggp +                               # Add polynomial regression curve
+  stat_smooth(method = "lm",
+              formula = y ~ poly(x, 3),
+              se = TRUE)
+
+ggp <- ggplot(task2, aes(CHILDAGE, correct)) +    # Create ggplot2 scatterplot
+  geom_point()
+
+ggp +                               # Add polynomial regression curve
+  stat_smooth(method = "lm",
+              formula = y ~ poly(x, 3),
+              se = TRUE)
+
+
+
+```
+
+```{r}
+
+
+task1tr1 = task1[task1[7] == 1,]
+task1tr2 = task1[task1[7] == 2,]
+task1tr3 = task1[task1[7] == 3,]
+task2tr1 = task2[task2[7] == 1,]
+task2tr2 = task2[task2[7] == 2,]
+task2tr3 = task2[task2[7] == 3,]
+
+```
+
+
+
+```{r}
+lm.fit = lm(data = task1tr1, correct ~ poly(CHILDAGE, degree=3))
+plot(task1tr1$CHILDAGE, task1tr1$correct, main = "Child correct vs Child Group for TASK1XTR1: Cubic Overlay", xlab = "CHILD Group", ylab = "Correct Score", cex.main = .72 )
+lines(sort(task1tr1$CHILDAGE),                 # Draw polynomial regression curve
+      fitted(lm.fit)[order(task1tr1$CHILDAGE)],
+      col = "red",
+      type = "l")
+
+lm.fit = lm(data = task1tr2, correct ~ poly(CHILDAGE, degree=3))
+plot(task1tr2$CHILDAGE, task1tr2$correct, main = "Child correct vs Child Group for TASK1XTR2: Cubic Overlay", xlab = "CHILD Group", ylab = "Correct Score" , cex.main = .72)
+lines(sort(task1tr2$CHILDAGE),                 # Draw polynomial regression curve
+      fitted(lm.fit)[order(task1tr2$CHILDAGE)],
+      col = "red",
+      type = "l")
+
+lm.fit = lm(data = task1tr3, correct ~ poly(CHILDAGE, degree=3))
+plot(task1tr3$CHILDAGE, task1tr3$correct, main = "Child correct vs Child Group for TASK1XTR3: Cubic Overlay", xlab = "CHILD Group", ylab = "Correct Score" , cex.main = .72)
+lines(sort(task1tr3$CHILDAGE),                 # Draw polynomial regression curve
+      fitted(lm.fit)[order(task1tr3$CHILDAGE)],
+      col = "red",
+      type = "l")
+
+lm.fit = lm(data = task2tr1, correct ~ poly(CHILDAGE, degree=3))
+plot(task2tr1$CHILDAGE, task2tr1$correct, main = "Child correct vs Child Group for TASK2XTR1: Cubic Overlay", xlab = "CHILD Group", ylab = "Correct Score" , cex.main = .72)
+lines(sort(task2tr1$CHILDAGE),                 # Draw polynomial regression curve
+      fitted(lm.fit)[order(task2tr1$CHILDAGE)],
+      col = "red",
+      type = "l")
+
+lm.fit = lm(data = task2tr2, correct ~ poly(CHILDAGE, degree=3))
+plot(task2tr2$CHILDAGE, task2tr2$correct, main = "Child correct vs Child Group for TASK2XTR2: Cubic Overlay", xlab = "CHILD Group", ylab = "Correct Score", cex.main = .72 )
+lines(sort(task2tr2$CHILDAGE),                 # Draw polynomial regression curve
+      fitted(lm.fit)[order(task2tr2$CHILDAGE)],
+      col = "red",
+      type = "l")
+
+lm.fit = lm(data = task2tr3, correct ~ poly(CHILDAGE, degree=3))
+plot(task2tr3$CHILDAGE, task2tr3$correct, main = "Child correct vs Child Group for TASK2XTR3: Cubic Overlay", xlab = "CHILD Group", ylab = "Correct Score", cex.main = .72 )
+lines(sort(task2tr3$CHILDAGE),                 # Draw polynomial regression curve
+      fitted(lm.fit)[order(task2tr3$CHILDAGE)],
+      col = "red",
+      type = "l")
+```
+
+```{r}
+par(mar = c(5, 4, 4, 8))
+plot(1:10)
+```
+
+
+
+```{r}
+while (!is.null(dev.list()))  dev.off()
+par(mar=c(5, 4, 4, 8), xpd = TRUE)
+
+lm.fit1 = lm(data = task1, correct ~ poly(CHILDAGE, degree=3))
+lm.fit2 = lm(data = task2, correct ~ poly(CHILDAGE, degree=3))
+
+plot(task1$CHILDAGE, task1$correct, main = "Child correct vs Child Group by TASK: Cubic Overlay", xlab = "CHILD Group", ylab = "Correct Score", cex.main = .72, col = "red", pch = 2)
+lines(sort(task1$CHILDAGE),                 # Draw polynomial regression curve
+      fitted(lm.fit1)[order(task1$CHILDAGE)],
+      col = "red",
+      type = "l")
+
+points(task2$CHILDAGE, task2$correct, xlab = "CHILD Group", ylab = "Correct Score", cex.main = .72,col = "blue" , pch = 6)
+
+lines(sort(task2$CHILDAGE),                 # Draw polynomial regression curve
+      fitted(lm.fit2)[order(task2$CHILDAGE)],
+      col = "blue",
+      type = "l")
+
+points(task1$CHILDAGE, task1$correct, main = "Child correct vs Child Group by TASK: Cubic Overlay", xlab = "CHILD Group", ylab = "Correct Score", cex.main = .72, col = "red", pch = 2)
+
+legend(9,1, legend=c("Task 1", "Task 2"),
+       col=c("red", "blue"), lty = 1:1, cex=.9)
+```
+
+

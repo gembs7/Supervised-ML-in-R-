@@ -1,0 +1,300 @@
+---
+title: "LAB-HW-5"
+author: "Nick Gembs"
+date: "3/12/2021"
+output: word_document
+---
+
+
+
+Problem #1: Examples given by TAs: Confidence Interval for Slope
+```{r}
+#set CI
+
+cl <- .75
+
+#Parameters
+
+beta0 <- 3
+beta1 <- 2
+
+#Number of data points
+
+ln <- 10
+
+#Select predictor values
+
+x <- 1:ln
+
+#simulate response
+
+y <- beta0 +(beta1*x) +rnorm(ln)
+
+#fit model
+lm.fit <- lm(y~x)
+
+#Construct CI
+confint(lm.fit, parm = 2, level = cl)
+ci <- confint(lm.fit, parm = 2, level = cl)
+
+#function to determine if x is between 2 values
+
+isBetween <- function(vec, x) {
+  ans <- (vec[1] < x ) * (vec[2] >x)
+  return(ans)
+}
+isBetween(ci, beta1)
+
+#repeat
+rept <- 10000
+#initialize vector to store results
+results <- rep(NA, times = rept)
+
+for(i in 1:rept) {
+
+  y <- beta0 +(beta1*x) +rnorm(ln)
+  #fit model
+  lm.fit <- lm(y~x)
+  #Construct CI
+  ci <- confint(lm.fit, parm = 2, level = cl)
+  results[i] <- isBetween(ci,beta1)
+
+}
+mean(results)
+```
+
+```{r}
+hist(rchisq(10000, df = 1)-1)
+mean(rchisq(10000, df = 1)-1)
+```
+
+\newpage
+
+Problem #2: A substance used in biological and medical research is shipped by airfreight to users in cartons of 1,000 ampules. The ‘Airfreight’ dataset collected the number of times the carton was transferred from one aircraft to another over the shipment route (X) and the number of ampules found to be broken upon arrival (Y). Assume that the linear regression model is appropriate.
+
+
+```{r}
+
+`Airfreight.(1)` <- read.csv("C:/Users/Nick/Downloads/Airfreight (1).csv")
+
+#Because of changes in airline routes, shipments may have to be transferred more often than in the past. Estimate the mean breakage, separately, for 3 transfers, and for 4 transfers, each with 99% Confidence.
+
+MeanT <- mean(`Airfreight.(1)`$NumberTransfer)
+MeanB <- mean(`Airfreight.(1)`$NumberBroken)
+
+b1 <- (sum((`Airfreight.(1)`$NumberTransfer-MeanT)*(`Airfreight.(1)`$NumberBroken-MeanB)))/(sum((`Airfreight.(1)`$NumberTransfer-MeanT)^2))
+
+b0 <- MeanB - MeanT * b1
+
+
+EY <- function(x) {
+  beta0 <- b0
+  beta1 <- b1
+  y<- beta0 + (beta1*x)
+  return(y)
+}
+
+
+l <- lm(NumberBroken~NumberTransfer, data = `Airfreight.(1)`)
+
+
+cis <- confint(l, parm = 2, level = .99)
+
+nthree <- data.frame(NumberTransfer = c(3))
+predict(l, newdata = nthree, interval = "confidence", level = 0.99)
+
+nfour <- data.frame(NumberTransfer = c(4))
+predict(l, newdata = nfour, interval = "confidence", level = 0.99)
+
+
+
+#Determine the standard error of the estimate for the mean number of broke ampules in when there are 3 transfers in a shipment.
+
+
+#The next shipment will need 3 transfers. Construct a 99% Prediction Interval for the number of broken ampules.
+
+predict(l, newdata = nthree, interval = "prediction", se.fit=T)
+
+#A consultant has suggested, based on previous experience, that the mean number of broken ampules should not exceed 9, when no transfers are made. Conduct an appropriate test, using α=0.05. State your hypotheses, decision rule, and conclusion. Report a p-value.
+
+
+summary(l)
+dof <- l$df.residual
+qt(0.05, df = dof, lower.tail = FALSE)
+
+t <- (l$coefficients[2] - 9)/ 0.4690
+t
+
+pt(t, df = dof, lower.tail = FALSE)
+ 
+
+```
+For three transfers, the fit is 22.2 with a lower of 18.68084 and upper of 25.71916
+For four transfers, the fit is 26.2 with a lower of 18.01094 and an upper of 31.17684
+se.fit = 1.048809
+residual.scale = 1.48324
+The 99% prediction interval for three transfers is a fit of 22.2 with a lower of 18.01094 and an upper of 26.38906
+
+
+h0: broken ampules <= 9
+h1: broken ampules > 9
+Accept the null because the p-value is greater than .05. The p-value is .9999974. The mean broken ampules at zero transfers should not exceed 9 ampules.
+
+
+\newpage
+
+3. Referring to the Airfrieght problem. Over the next few days, two independent shipments will occur. (1)If X and Y are two random variables, then E(X+Y)=E(X)+E(Y). (2) If X and Y are two random variables, then V(X+Y)=E(X)+E(Y)+2Cov(X,Y). Further, if they are independent, the covariance term is zero. (3) If If X and Y are two normallly distributed random variables, then R=X+Y is also a normally distributed random variable.
+
+```{r}
+`Airfreight.(1)` <- read.csv("C:/Users/Nick/Downloads/Airfreight (1).csv")
+#a.	Obtain a point estimate for the expected total number of broken ampules in these two shipments when there are zero transfers each. ( Explain how this result is determined. )
+
+estimate <- EY(0) +EY(0)
+estimate
+
+paste("Since both variables are random and independent, E(X+Y) = E(X)+E(Y)")
+#b.	Obtain a point estimate for the variance of the total number of broken ampules in these two shipments when there are zero transfers each. ( Explain how this result is determined.)
+
+
+var <- var(`Airfreight.(1)`)+var(`Airfreight.(1)`)
+paste("Since both variables are random and independent, Cov(x,Y) is 0 and V(X+Y) = E(X)+E(Y)+2Cov(X,Y)")
+
+#c.	What type of distribution does the total number of ampules broken in two shipments have when there are zero transfers each?
+
+paste("Normal Distribution")
+```
+Point estimate mean = `r estimate`. Since both variables are random and independent, E(X+Y) = E(X)+E(Y).
+Point estimate variance = `r var`. Since both variables are random and independent, Cov(x,Y) is 0 and V(X+Y) = E(X)+E(Y)+2Cov(X,Y)
+Normal distribution
+
+
+\newpage
+
+Problem #4: Experience with a certain type of plastic indicates that a relation exists between the hardness of items molded from the plastic (Y) and the time elapsed since the end of the molding process (X). Sixteen batches of plastic were made and from each batch one test item was molded. Each test item was randomly assigned to one of four predetermined time levels, and the hardness was measured after the assigned elapsed time. The data is help in the Plastic.csv file.
+
+```{r}
+
+Plastic <- read.csv("C:/Users/Nick/Downloads/Plastic.csv")
+
+#Determine the equation of the regression function. Plot the function with the data. Does the linear regression function appear to be a good fit? Explain.
+	
+
+
+plot(Plastic$Time, Plastic$Hardness)
+
+MeanH <- mean(Plastic$Hardness)
+MeanT <- mean(Plastic$Time)
+
+
+b1 <- (sum((Plastic$Time-MeanT)*(Plastic$Hardness-MeanH)))/(sum((Plastic$Time-MeanT)^2))
+
+b0 <- MeanH - MeanT * b1
+
+
+EY <- function(x) {
+  beta0 <- b0
+  beta1 <- b1
+  y<- beta0 + (beta1*x)
+  return(y)
+}
+
+
+curve(EY(x), from = 0, to = 35, add = T)
+
+paste("The linear regression does appear to be a good fit, most of the data points are at or near the regression line, with a clear positive linear trend.")
+
+#Estimate with 90% confidence the change in mean hardness when the elapsed time increases by 1 hour.
+	
+l <- lm( Plastic$Hardness~Plastic$Time)
+summary(l)
+
+confint(l, parm = 2, level = .9)
+cis <- confint(l, parm = 2, level = .9)
+
+onehour <- 1*cis
+
+#Estimate with 95% confidence the mean hardness at 30 hours.
+	
+l <- lm(Hardness~Time, data = Plastic)
+
+
+cis <- confint(l, parm = 2, level = .95)
+
+nthirty <- data.frame(Time = c(30))
+predict(l, newdata = nthirty, interval = "confidence", level = 0.95)
+
+#Estimate σ. What units does it have?
+
+sigmasq <- sum((l$residuals)^2)/l$df.residual
+sigma <- sqrt(sigmasq)
+sigma
+
+paste("units = hardness (N/mm²)")
+
+#The plastic manufacturer has stated that the mean hardness should increase by 2 units per hour. Conduct a test to decide whether this statement appears to be correct. Use α=0.01. State the hypotheses, decision rule, and conclusion.
+
+dof <- l$df.residual
+qt(0.01, df = dof, lower.tail = FALSE)
+
+t <- (l$coefficients[2] - 2)/0.1483
+t
+
+pt(t, df = dof, lower.tail = FALSE)
+ 
+	
+#Estimate with 98% confidence the hardness of a newly molded test item with an elapsed time of 30 hours.
+
+predict(l, newdata = nthirty, interval = "prediction", se.fit=T)
+```
+
+The regression function is Y = `r b0` + `r b1` * X
+The linear regression does appear to be a good fit, most of the data points are at or near the regression line, with a clear positive linear trend.
+The 90% confidence interval of the change in mean hardness when the elapsed time increases by 1 hour is `r onehour`.
+The 95% confidence interval of the mean hardness at 30 hours has a fit of 230.4167 with a lower of 227.4851 and an upper of 233.3482.
+sigma estimate = `r sigma`. units = hardness (N/mm²)
+
+h0: hardness = 2 units/hour
+h1: hardness /= 2 units/hour
+Accept the null and reject the alternative. The p-value is greater than .05. P-value= .209498. The mean hardness should increase by 2 units/hour
+
+The 98% confidence of the hardness of a newly molded test item with an elapsed time of 30 hours has a fit of 230.4167 with a lower of 222.3837 and an upper of 238.4496.
+
+
+\newpage
+
+Problem #5: A marketer was studying the relation between Advertising expenditures (X) and Units Sold (Y) for a product they were marketing. The data is held in a file named AdsSales.csv. After analysing the data, the marketer concluded that the more money that is spent on advertising the fewer units sold. Do you agree with this conclusion. Explain.
+
+
+```{r}
+
+AdsSales <- read.csv("C:/Users/Nick/Downloads/AdsSales.csv")
+
+l <- lm(Sales~Adverts, data = AdsSales)
+summary(l)
+
+plot(AdsSales$Adverts, AdsSales$Sales)
+
+MeanA <- mean(AdsSales$Adverts)
+MeanS <- mean(AdsSales$Sales)
+
+
+b1 <- (sum((AdsSales$Adverts-MeanA)*(AdsSales$Sales-MeanS)))/(sum((AdsSales$Adverts-MeanA)^2))
+
+b0 <- MeanS - MeanA * b1
+
+
+EY <- function(x) {
+  beta0 <- b0
+  beta1 <- b1
+  y<- beta0 + (beta1*x)
+  return(y)
+}
+
+
+curve(EY(x), from = 0, to = 10, add = T)
+
+cor(AdsSales$Adverts, AdsSales$Sales)
+
+
+```
+I disagree with this solution. Although the slope of the estimated regression equation is negative, The standard error of the slope has a greater magnitude than the slope itself. The Pearson's correlation coefficient is -.02917626 which is much closer to zero than one, suggesting that there is little to no correlation between money spent on advertising and products sold.

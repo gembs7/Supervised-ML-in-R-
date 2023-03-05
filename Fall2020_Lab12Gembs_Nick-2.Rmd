@@ -1,0 +1,174 @@
+---
+title: 'Lab #12'
+author: "Nick Gembs"
+date: "12/14/2020"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+1. Create a functions that determines whether a testValue is inside an interval, or outside an interval. It should take two arguments: One is the testValue. The second argument should be a vector of length two that represents an interval. It should return TRUE, if the testValue is outside the interval.Otherwise it returns FALSE.
+
+```{r}
+
+outside = function( testValue, interval){
+    return(testValue < min(interval) | testValue > max(interval))
+}
+
+```
+
+
+
+```{r}
+############# 
+rMysteryGenerator <- function(n, shift = 0) {
+    a <- qchisq(runif(n), df = 2)
+    b <- pchisq(a, df = 2)
+    c <- pbeta(rbeta(n, shape1 = 1, shape2 = 2), shape1 = 1, shape2 = 2)
+    d <- sqrt(-2 * log(b)) * cos(2 * pi * c) + punif(2) + shift
+    e <- pnorm(d)
+    return(d)
+}
+############# 
+```
+
+
+
+2. rMysteryGenerator is a random number generator. Decide if the distribution meets the standards for conducting a two-sided test about a mean.
+
+```{r}
+
+samp = rMysteryGenerator(10000, shift = 0)
+hist(samp)
+```
+Yes
+
+
+3. Hypothesize a value for the mean of the distribution.
+
+The mean appears to be around 1.
+
+4. You will use a sample size of 10 to conduct a two sided hypothesis test with a  significance level of 0.05. Determine the critical values for such a test.
+
+```{r}
+
+alpha = .05
+n = 10
+cv = qt(alpha/2, df=n-1, lower.tail=F)
+cv
+```
+
+
+5. Take a sample of size 10 from this distribution. Decide whether your hypothesis for the mean appears to be correct or not.
+
+```{r}
+
+samp =  rMysteryGenerator(10, shift = 0)
+tResults = t.test(samp, mu=1, alternative="two.sided")
+tResults
+str(tResults)
+testStat = tResults$statistic
+outside(testStat, c(-cv, cv))
+```
+
+
+
+6. Repeat the test 10000 times. Determine the fraction of the tests where you would reject the null hypothesis, and what fraction do you fail to reject the null hypothesis.
+
+```{r}
+
+reps = 10000
+holder = rep(NA,reps)
+
+for (i in 1:reps){
+    samp =  rMysteryGenerator(n, shift = 0)
+    tResults = t.test(samp , mu=1 , alternative = "two.sided")
+    testStat = tResults$statistic
+    holder[i] = outside(testStat, c(-cv,cv))
+}
+mean(holder)
+```
+
+
+
+7. If a test is perfect, what should the number that was produced be?
+
+0
+
+
+8. The TA will inform you of the actual mean. What does your result form part 6 mean?
+
+
+The actual mean is 1. Our null hypothesis is true, our test has a .0498 type 1 error rate.
+
+
+9. The **shift** argument shifts the mean of the distribution. Thus, if the original mean is 12 and shift is equal to .5, the distribution used to generate the sample  has a mean of 12.5. Repeat 6-9 with a shift of 0.1.
+
+```{r}
+
+reps = 10000
+holder = rep(NA,reps)
+
+for (i in 1:reps){
+    samp =  rMysteryGenerator(n, shift = .1)
+    tResults = t.test(samp , mu=1 , alternative = "two.sided")
+    testStat = tResults$statistic
+    holder[i] = outside(testStat, c(-cv,cv))
+}
+mean(holder)
+
+```
+
+
+10. Increase the size of the shift, does the probability of a Type II error increase or decrease?
+
+```{r}
+reps = 10000
+holder = rep(NA,reps)
+
+for (i in 1:reps){
+    samp =  rMysteryGenerator(n, shift = .15)
+    tResults = t.test(samp , mu=1 , alternative = "two.sided")
+    testStat = tResults$statistic
+    holder[i] = outside(testStat, c(-cv,cv))
+}
+mean(holder)
+
+```
+The probability of a Type II error decreases.
+
+11. Determine how big **shift** must be so that the probability of a Type II error is approximately 0.10.
+
+```{r}
+possibleshifts = seq(0,5,by=.1)
+ln = length(possibleshifts)
+holdMeanHolder = rep(NA, ln)
+
+for ( i in 1:ln){
+    reps = 1000
+    holder = rep(NA,reps)
+
+    for (j in 1:reps){
+        samp =  rMysteryGenerator(n, shift = possibleshifts[i])
+        tResults = t.test(samp , mu=1 , alternative = "two.sided")
+        testStat = tResults$statistic
+        holder[j] = outside(testStat, c(-cv,cv))
+    }
+    holdMeanHolder[i] = mean(holder)
+}    
+
+plot(possibleshifts, holdMeanHolder, type="l")
+
+pos = which.max(holdMeanHolder >= .9)
+possibleshifts[pos]
+```
+With a sample size of 10, the shift away from the mean has to be at least 1.2 to reduce the type II error rate to .1
+
+
+
+
+
+

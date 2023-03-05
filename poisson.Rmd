@@ -1,0 +1,242 @@
+---
+title: "Stsci4110HW5"
+author: "Nick Gembs"
+date: "11/2/2022"
+output:
+  word_document: default
+  html_document: default
+---
+
+
+```{r}
+df = read.csv("C:/Users/Nick/Downloads/bookspoll_f2022.csv")
+```
+
+```{r, eval=FALSE}
+df
+```
+
+```{r}
+#a
+
+# Total Fit
+
+fit.total = glm(books~news+prelim+summerjob, data = df, family = "poisson")
+summary(fit.total)
+
+# Backward Selection 1
+
+fit.np = glm(books~news+prelim, data = df, family = "poisson")
+fit.ns = glm(books~news+summerjob, data = df, family = "poisson")
+fit.ps = glm(books~prelim+summerjob, data = df, family = "poisson")
+
+library(lmtest)
+
+
+#HO : summerjob is not significant in predicting book
+#H1 : summerjob is significant in predicting book
+lrtest(fit.total,fit.np)
+
+#HO : prelim is not significant in predicting book
+#H1 : prelim is significant in predicting book
+lrtest(fit.total,fit.ns)
+
+#HO : news is not significant in predicting book
+#H1 : news is significant in predicting book
+lrtest(fit.total,fit.ps)
+
+# highest p-value was in the model testing news, meaning that news was the worst predictor of book. Remove news.
+
+# Backward Selection 2
+
+fit.p = glm(books~prelim, data = df, family = "poisson")
+fit.s = glm(books~summerjob, data = df, family = "poisson")
+
+#HO : summerjob is not significant in predicting book
+#H1 : summerjob is significant in predicting book
+lrtest(fit.ps,fit.p)
+
+#HO : prelim is not significant in predicting book
+#H1 : prelim is significant in predicting book
+lrtest(fit.ps,fit.s)
+
+# highest p-value was in the model testing summerjob, meaning that summerjob was the next worst predictor of book. Remove summerjob.
+
+finalmodel = glm(books~prelim, data = df, family = "poisson")
+
+```
+
+
+```{r}
+#b
+
+x = seq(min(df$prelim),max(df$prelim), 1)
+dataframe = data.frame(prelim = x)
+
+p.final = predict.glm(finalmodel, newdata = dataframe, type = "response")
+
+plot(df$prelim, df$books, xlab = "prelim", ylab = "books")
+
+lines(x,p.final, col = "blue", lwd = 2)
+
+
+```
+
+```{r}
+#c
+
+#summary(fit.total)
+#summary(finalmodel)
+
+ans.total = exp(fit.total$coefficients[1] + 0*fit.total$coefficients[2] + 80*fit.total$coefficients[3] + 0*fit.total$coefficients[4])
+ans.final = exp(finalmodel$coefficients[1] + finalmodel$coefficients[2]*80)
+
+cat("Using the full model, the expected number of books is: ", ans.total, "\n" , "Using the reduced selected model, the expected number of books is: ", ans.final)
+```
+
+```{r}
+#d
+
+ans.total = exp(fit.total$coefficients[1] + 1*fit.total$coefficients[2] + 95*fit.total$coefficients[3] + 1*fit.total$coefficients[4])
+ans.final = exp(finalmodel$coefficients[1] + finalmodel$coefficients[2]*95)
+
+cat("Using the full model, the expected number of books is: ", ans.total, "\n" , "Using the reduced selected model, the expected number of books is: ", ans.final)
+```
+
+
+```{r}
+#e
+
+# 𝐻0: ‘extra’ parameters (those in the saturated model, but not in our model are equal to zero.) ”Good Fit of Model M”
+# 𝐻𝐴: at least one of these ‘extra’ parameters is not zero “Lack-of-fit of Model M”
+
+summary(finalmodel)
+
+pvalue = 1- pchisq(259.64,df = 126)
+pvalue
+
+cat("The P-value is 0, reject the null. This model has a lack of fit, it could be suggested to be less restrictive in the backward selection, adding parameters to the model. The model needs to have an increased # of parameters or increased flexibility.")
+
+```
+
+2.
+```{r}
+
+df2 = read.csv("C:/Users/Nick/Downloads/birthdata2.csv")
+```
+
+
+```{r, eval= F}
+df2
+```
+
+```{r}
+#a
+
+raw <- data.frame(df2$hospnum, df2$csec/df2$birth, df2$hosptype)
+raw
+
+print("It appears that private hospitals (hosptype = 0) may have higher c-section rates than public hospitals.")
+```
+
+
+```{r}
+#b
+
+library(ggplot2)
+
+ggplot(data = raw, aes(x = df2.hospnum, y = df2.csec.df2.birth, color = df2.hosptype)) + 
+  geom_point()
+```
+
+```{r}
+#c
+
+cat("The model is ln(mean_csec) = ln(births) + B0 + B1*hosptype + B2*ses")
+```
+
+
+
+```{r}
+#d
+
+c.fit = glm(df2$csec~ df2$hosptype + df2$ses + offset(log(df2$births)), family = "poisson")
+summary(c.fit)
+```
+```{r}
+# e
+
+#HO : predictor is not significant in predicting mean(csec)
+#H1 : predictor is significant in predicting mean(csec)
+
+anova(c.fit)
+1-pchisq(208.72,1)
+1-pchisq(246.59,1)
+
+cat("P-values for both hosptype and ses are less than .05. They are both significant predictors of csec.")
+
+ses_rate = exp(c.fit$coefficients[1]+c.fit$coefficients[3]+c.fit$coefficients[2])/exp(c.fit$coefficients[1]+c.fit$coefficients[2])
+ses_rate
+
+hosptype_rate = exp(c.fit$coefficients[1]+c.fit$coefficients[2]+c.fit$coefficients[3])/exp(c.fit$coefficients[1]+c.fit$coefficients[3])
+hosptype_rate
+
+cat("An increase in ses by one unit results in a ", ses_rate , " multiplicative change in mean csec\n")
+cat("A change from private to public hospital results in a ", hosptype_rate , " multiplicative change in mean csec")
+```
+
+
+```{r}
+#f
+
+
+# 𝐻0: ‘extra’ parameters (those in the saturated model, but not in our model are equal to zero.) ”Good Fit of Model M”
+# 𝐻𝐴: at least one of these ‘extra’ parameters is not zero “Lack-of-fit of Model M”
+
+summary(c.fit)
+
+pvalue = 1- pchisq(23.871,df = 17)
+pvalue
+
+cat("The P-value is .1229826 > .05, fail to reject the null. This model has a good fit")
+
+
+```
+
+
+```{r}
+#g
+
+x = seq(min(df2$hospnum),max(df2$hospnum), 1)
+dataframe = data.frame(hospnum = x, actual = df2$csec)
+
+p.final = predict.glm(c.fit, newdata = dataframe, type = "response")
+
+dataframe = cbind(dataframe, predicted= p.final, hosptype = df2$hosptype, births = df2$births, ses = df2$ses)
+dataframe
+
+```
+
+
+```{r}
+#h
+
+
+#plot(df2$ses,(c.fit$fitted.values/df2$births)*1000)
+
+ggplot(data = df2, aes(x = df2$ses, y = (c.fit$fitted.values/df2$births)*1000, color = df2$hosptype)) + 
+  geom_point() +  xlab("ses") + ylab("Predicted csec per 1000 births")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+

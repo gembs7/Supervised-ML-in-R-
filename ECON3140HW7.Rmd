@@ -1,0 +1,199 @@
+---
+title: "ECON3140HW7"
+author: "Nick Gembs"
+date: "5/1/2022"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r}
+library(haven)
+
+data <- read_dta("C:/Users/Nick/Downloads/hmda-project-1.dta")
+
+```
+
+
+
+1. This paper poses the question of whether there is racial discrimination bias in the disperal of mortgage loans. Data collected includes individuals wealth, financial information, race, and whether or not they were approved for a loan. Previous studies were done on this topic by Harold Black et al., (1978), Thomas A. King ( 1980), and Robert Schafer and Helen F. Ladd (1981). These studies found that being a minority did have a significant decrease on an individuals odds of getting a loan, however, this data is over 10 years old and leaves out significant information that could be highly correlated with race, such as credit history, employment history, and different types of lenders. In the results, OLS estimators show that although economic factors due have some impact on the dispraportionate denial rates of minorities, race is significant influence beyond the 1% significance bound.
+
+
+```{r}
+
+#2
+
+len = length(data$s7)
+
+for (i in 1:len){
+  if (data$s7[i] == 3){
+    data$s7[i] = 1
+  } else {
+    data$s7[i] = 0
+  }
+}
+
+
+black = rep(0,len)
+cbind(data,black)
+for (i in 1:len){
+  if (data$s13[i] == 3){
+    data$black[i] = 1
+  } else if (data$s13[i] == 5) {
+    data$black[i] = 0
+  } else {
+    data$black[i] = NA
+  }
+}
+
+```
+
+```{r}
+#3
+
+plot(data$s7,data$black)
+
+bfraction = sum(data$black)/length(data$black)
+dfraction = sum(data$s7)/length(data$s7)
+
+library(data.table)
+library(survival)
+library(gmodels)
+table <- data.frame(data$black, data$s7)
+CrossTable(data$black,data$s7)
+
+# The crosstabulation shows that the B0 should be .093 as that is the percent of denials when the individual is not black. B1 should be .283-.093 as that is the difference in percent denials when the individual race is changed to black.
+lm.fit = lm(data$s7~data$black)
+lm.fit
+```
+
+```{r}
+#4
+
+lm.fit2 = lm(data$s7~data$s46)
+summary(lm.fit2)
+
+# This data is statistically significant to a high degree, showing that being denied for a loan is highly correlated (positively) with a given individual's payment/income ratio. This makes sense as cash outflows are harmful to a person's financials while inflows are a benefit. Banks prefer savers over spenders.
+
+# Load libraries
+library("lmtest")
+library("sandwich")
+
+# Robust t test
+robust = coeftest(lm.fit2, vcov = vcovHC(lm.fit2, type = "HC0"))
+robust
+
+# This test likely suffers from heteroskedasticity, so robust standard errors are preferred.
+
+plot(data$s46, data$s7)
+abline(robust)
+```
+
+```{r}
+#5
+
+lm.fit2$coefficients[1] + .2*lm.fit2$coefficients[2]
+lm.fit2$coefficients[1] + .1*lm.fit2$coefficients[2]
+
+
+# The value impact on denial is negative for a PI of 20%. This could be interpereted as a 20% PI decreasing the odds of denial as it is a financially healthy value. A PI of 10% decreases the value further, but only by a small amount. To make this amount more accurate. we can use a log model that will account for percent changes rather than unit changes.
+```
+
+```{r}
+#6
+
+#prevent undefined log error
+data$s46[350] = .0001
+
+lm.fit3 = lm(data$s7~log(data$s46))
+summary(lm.fit3)
+
+lm.fit3$coefficients[1] + .2*lm.fit3$coefficients[2]
+lm.fit3$coefficients[1] + .1*lm.fit3$coefficients[2]
+```
+
+```{r}
+#7
+
+lm.fit4 = lm( data$s7 ~ log(data$s46) + data$black)
+summary(lm.fit4)
+
+# The indicator variable for black is both large (.18348 increase in percent for black) and statistically significant (p=2x10^-16)
+```
+
+8. The problem with Beta2 in example 7 is that it likely suffers from endogeneity. There are many factors that are correlated with minority status that likely have a significant impact on mortgage loan denial that are not included in this model. This will make race absorb some of the causal effect that other variables would have taken on.
+
+```{r}
+#9
+
+# s7 = denial likelihood
+# black = black indicator
+# self = self-employment indicator
+# HI = housing expense/income ratio
+# LV = loan/value
+# CCS = consumer credit score
+# MCS = mortgage credit score
+# noMI mortgage insurance denied
+
+
+
+lm.fittotal = lm(data$s7 ~ log(data$s46) + data$black + data$LV + (data$LV)^2 + data$HI + data$self + data$CCS + data$MCS + data$NoMI)
+
+summary(lm.fittotal)
+
+lm.fittotalnolog = lm(data$s7 ~ (data$s46) + data$black + data$LV + (data$LV)^2 + data$HI + data$self + data$CCS + data$MCS + data$NoMI)
+
+summary(lm.fittotalnolog)
+
+# Except for LV, all of the variables are positively significant with regards to loan denial in at least one of the two regressions. This makes economical sense because each of the variables (besides black) are either an indicator or measurement of something that would make an individual a more fiscally risky investment.Taking the log of PI switches its significance with HI, this is likely because there is a high degree of correltaion/collinearity between the two variables.
+
+```
+```{r}
+#10
+
+lm.fittotal$coefficients[3]
+lm.fittotalnolog$coefficients[3]
+```
+The predicted effect of race on loan denial in the OLS specification is between 10-11% depending on the model used. Economically, this mean that being an individual who is black will increase your odds of being denied a mortgage loan by 10-11% as opposed to being white, all other financial factors being equal.
+
+
+11.
+
+As stated in question 10, both specifications produce similar values of the coefficient on the indicator variable of black. This is because both the percent and unit increase of PI have a similar overall effect on the model and account for a similar set of variability.
+
+
+```{r}
+#12
+
+(sum(data$LV)/length(data$LV))
+
+sum(data$LV)
+length(data$LV)
+which(is.na(data$LV))
+data$LV[2246] = .75
+
+whiteavg = lm.fittotal$coefficients[1] + lm.fittotal$coefficients[2] * (sum(log(data$s46))/length(data$s46)) + lm.fittotal$coefficients[3] * 0 + lm.fittotal$coefficients[4] * (sum(data$LV)/length(data$LV)) + lm.fittotal$coefficients[4] * (sum((data$LV)^2)/length((data$LV)^2)) + lm.fittotal$coefficients[5] * (sum(data$HI)/length(data$HI)) + lm.fittotal$coefficients[6] * (sum(data$self)/length(data$self)) + lm.fittotal$coefficients[7] * (sum(data$CCS)/length(data$CCS)) + lm.fittotal$coefficients[8] * (sum(data$MCS)/length(data$MCS)) + lm.fittotal$coefficients[9] * (sum(data$NoMI)/length(data$NoMI))
+
+whiteavg
+
+blackavg = lm.fittotal$coefficients[1] + lm.fittotal$coefficients[2] * (sum(log(data$s46))/length(data$s46)) + lm.fittotal$coefficients[3] * 1 + lm.fittotal$coefficients[4] * (sum(data$LV)/length(data$LV)) + lm.fittotal$coefficients[4] * (sum((data$LV)^2)/length((data$LV)^2)) + lm.fittotal$coefficients[5] * (sum(data$HI)/length(data$HI)) + lm.fittotal$coefficients[6] * (sum(data$self)/length(data$self)) + lm.fittotal$coefficients[7] * (sum(data$CCS)/length(data$CCS)) + lm.fittotal$coefficients[8] * (sum(data$MCS)/length(data$MCS)) + lm.fittotal$coefficients[9] * (sum(data$NoMI)/length(data$NoMI))
+
+blackavg
+
+whiteavgnolog = lm.fittotalnolog$coefficients[1] + lm.fittotalnolog$coefficients[2] * (sum((data$s46))/length(data$s46)) + lm.fittotalnolog$coefficients[3] * 0 + lm.fittotalnolog$coefficients[4] * (sum(data$LV)/length(data$LV)) + lm.fittotalnolog$coefficients[4] * (sum((data$LV)^2)/length((data$LV)^2)) + lm.fittotalnolog$coefficients[5] * (sum(data$HI)/length(data$HI)) + lm.fittotalnolog$coefficients[6] * (sum(data$self)/length(data$self)) + lm.fittotalnolog$coefficients[7] * (sum(data$CCS)/length(data$CCS)) + lm.fittotalnolog$coefficients[8] * (sum(data$MCS)/length(data$MCS)) + lm.fittotalnolog$coefficients[9] * (sum(data$NoMI)/length(data$NoMI))
+
+whiteavgnolog
+
+blackavgnolog = lm.fittotalnolog$coefficients[1] + lm.fittotalnolog$coefficients[2] * (sum((data$s46))/length(data$s46)) + lm.fittotalnolog$coefficients[3] * 1 + lm.fittotalnolog$coefficients[4] * (sum(data$LV)/length(data$LV)) + lm.fittotalnolog$coefficients[4] * (sum((data$LV)^2)/length((data$LV)^2)) + lm.fittotalnolog$coefficients[5] * (sum(data$HI)/length(data$HI)) + lm.fittotalnolog$coefficients[6] * (sum(data$self)/length(data$self)) + lm.fittotalnolog$coefficients[7] * (sum(data$CCS)/length(data$CCS)) + lm.fittotalnolog$coefficients[8] * (sum(data$MCS)/length(data$MCS)) + lm.fittotalnolog$coefficients[9] * (sum(data$NoMI)/length(data$NoMI))
+
+blackavgnolog
+
+
+blackavg-whiteavg
+lm.fittotal$coefficients[3]
+
+blackavgnolog-whiteavgnolog
+lm.fittotalnolog$coefficients[3]
+
+``` 
+As seen from the equation in #12, the effect of indicator black on the average individual as well as the average predicted effect of indicator black on an individual are equivalent to the respective coefficients of the beta value for black in the OLS and altered OLS regressions.

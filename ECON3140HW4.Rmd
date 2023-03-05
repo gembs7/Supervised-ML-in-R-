@@ -1,0 +1,65 @@
+---
+title: "ECON HW 4"
+author: "Nick Gembs"
+date: "3/19/2022"
+output:
+  word_document: default
+  html_document: default
+---
+
+
+```{r}
+library(haven)
+
+data <- read_dta('C:/Users/Nick/Downloads/WAGE1.DTA')
+data
+
+```
+
+```{r}
+#1.1
+
+lm.fit <- lm( log(data$wage) ~ data$educ + data$exper + (data$expersq))
+lm.fit
+summary(lm.fit)
+
+```
+
+```{r}
+#1.2
+
+lm.fit.reduced <- lm( log(data$wage) ~ data$educ + data$exper )
+anova( lm.fit , lm.fit.reduced)
+
+# Exp^2 is statistically significant with a p-value of 1.421 * 10^-9
+
+```
+
+```{r}
+#1.3
+
+tenth = lm.fit$coefficients[3]*10 + lm.fit$coefficients[4]*(10^2)
+sprintf( "tenth year effect is %f", tenth)
+
+twentyth = lm.fit$coefficients[3]*20 + lm.fit$coefficients[4]*(20^2)
+sprintf( "twentyth year effect is %f", twentyth)
+
+thirthyth = lm.fit$coefficients[3]*30 + lm.fit$coefficients[4]*(30^2)
+sprintf( "thirtyth year effect is %f", thirthyth)
+
+```
+
+```{r}
+#1.4
+
+y = ('lm.fit$coefficients[3]*x + lm.fit$coefficients[4]*(x^2)')
+zero = -lm.fit$coefficients[3]/lm.fit$coefficients[4]
+zero
+lm.fit$coefficients[3]*zero + lm.fit$coefficients[4]*(zero^2)
+
+sprintf("%f years of experience until zero effect. Zero people have this much work experience.", zero)
+
+#data$exper
+
+```
+

@@ -1,0 +1,72 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+p0 <- 0.8
+x <- 73
+n <- 100
+phat <- x/n
+sigLev <- 0.05
+CV <- qnorm(1 - sigLev)
+SE <- sqrt((p0 * (1 - p0))/n)
+z <- (phat - p0)/SE
+pval <- pnorm(z)
+results <- data.frame(phat, z, CV, pval)
+results
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+pnorm(.95)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+
+```{r}
+pnorm(40.6, mean = 40.2, sd = 1, lower.tail=F)
+```
+
+
+```{r}
+
+t <-( 4.19   - 8.7)/1.473 
+t
+```
+
+```{r}
+library(MASS)
+
+x <- c(1,2,5,9,15)
+y <- c(24.12, 14.90 ,10.79 ,2.85 ,48.25)
+
+x1 <- c(1,5,9,15)
+y1 <- c(24.12, 10.79 ,2.85 ,48.25)
+
+lm <- lm(y~x)
+summary(lm)
+
+studres(lm)
+
+h<- hatvalues(lm)
+fit.drop <- lm(y1 ~ x1)
+sigma.fit.drop <- summary(fit.drop)$sigma
+(y[2] - fitted.values(lm)[2])/(sigma.fit.drop * sqrt(1 - h[2]))
+```
+

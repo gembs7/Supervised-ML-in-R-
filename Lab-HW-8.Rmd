@@ -1,0 +1,326 @@
+---
+title: "Lab-HW-8"
+author: "Nick Gembs"
+date: "4/9/2021"
+output: word_document
+---
+
+Problem #1: A materials engineer at a furniture manufacturing site wants to assess the stiffness of the particle board that the manufacturer uses. The engineer collects stiffness data from particle board pieces that have various densities at different temperatures. (Minitab) Use the ParticleBoard dataset to answer the following questions. For these questions we will assume that all regression assumptions are met.
+```{r}
+
+Particle <- read.csv("C:/Users/Nick/Downloads/ParticleBoard (1).csv")
+
+#Construct a scatterplot matrix. Visually, do either of the predictor variables appear to have a linear relationship with the response.
+	
+names(Particle)[1] <- "Density"
+
+pairs(~Density+Stiffness+Temp, data = Particle)
+
+paste("There appears to be a linear relationship between Density and stiffness")
+
+#Compute the correlation matrix. Does this agree with your visual findings?
+	
+corr <- cor(Particle)
+corr
+
+paste("The correlation matrix agrees with the findings, Density and Stiffness have a high positive correlation of 0.919076527 while the other combinations do not have a strong correlation.")
+
+#What are the two models being compared for a test of H_0:β_"density" =β_"temp" =0 vs H_1:" at least one not zero" .
+
+paste("The two models being compared in this test are a model where density and temperature do not have an effect on stiffness ( Stiffness = beta0 +error) and a model where at least one of density or temperature effect stiffness (Stiffness = beta0 +beta1*(Density) + beta2*(Temp) + error) where beta1 and/or beta2 do not equal 0.")
+
+#Conduct the test using lm() and summary() function. Indicate the F statistic, P-value, and conclusion.
+	
+
+fit.all <- lm(Stiffness ~ Density + Temp, data=Particle)
+summary(fit.all)
+
+paste("Reject the null and accept the alternative, at least one of beta_density and beta_temp is not zero. The 7F-statistic is 3.57 on 2 and 26 DF,  and the p-value: 1.975e-11")
+
+#Conduct the same test using full model and the anova() function. Compare your results to the previous part. You will need to recreate the ANOVA table that does not partition SSReg. Indicate how the F statistic can be used to determine the p-value.
+	
+anova <-anova(fit.all)
+anova
+paste("The anova table supports the previous part that states at least one of beta_density and beta_temp is not zero. Both tests produce an F-statistic of 73.57. The F-statistic can be compared to a critical value in order to determine a p-value, if the f-statistic is greater than the critical value, the results are significant. The higher the f-statistic, the more significant the results and the lower the p-value.")
+
+SSREG <- sum(anova$`Sum Sq`)-2053.8
+SSREG
+
+MS <- SSREG/2
+MSE <- 2053.8/26
+
+F1 <- MS/MSE
+F1
+
+#Fit full and reduced models using lm(). Then conduct the test again using the anova() and both models. You should use the general linear F test.
+
+fit.all <- lm(Stiffness ~ Density + Temp, data=Particle)
+fit.intercept <- lm(Stiffness ~ 1, data=Particle)
+
+anova(fit.intercept, fit.all)
+
+fit.all <- lm(Stiffness ~ Density + Temp, data=Particle)
+fit.reduced <- lm(Stiffness ~ Density, data=Particle)
+
+anova(fit.reduced, fit.all)
+#Does it appear that both variables are needed? Explain your reasoning.
+
+paste("It does not appear that both variables are needed as a general linear F test comparing using just Density and using density and temperature shows no significant difference, with an F-statistic of .8881 and a p value of .3547. It appears that only density has a significant effect on stiffness.")
+```
+A) There appears to be a linear relationship between Density and stiffness
+
+B) The correlation matrix agrees with the findings, Density and Stiffness have a high positive correlation of 0.919076527 while the other combinations do not have a strong correlation.
+
+C) The two models being compared in this test are a model where density and temperature do not have an effect on stiffness ( Stiffness = beta0 +error) and a model where at least one of density or temperature effect stiffness (Stiffness = beta0 +beta1*(Density) + beta2*(Temp) + error) where beta1 and/or beta2 do not equal 0.
+
+D) Reject the null and accept the alternative, at least one of beta_density and beta_temp is not zero. The F-statistic is 3.57 on 2 and 26 DF,  and the p-value: 1.975e-11
+
+E) The anova table supports the previous part that states at least one of beta_density and beta_temp is not zero. Both tests produce an F-statistic of 73.57. The F-statistic can be compared to a critical value in order to determine a p-value, if the f-statistic is greater than the critical value, the results are significant. The higher the f-statistic, the more significant the results and the lower the p-value.
+
+G) It does not appear that both variables are needed as a general linear F test comparing using just Density and using density and temperature shows no significant difference, with an F-statistic of .8881 and a p value of .3547. It appears that only density has a significant effect on stiffness.
+
+
+\newpage
+
+Problem #2: A materials scientist studies the heat that is generated in cement mixtures. The scientist varies the four ingredients in the mixtures to assess the impact on overall heat generation. For these questions we will assume that all regression assumptions are met. (Data are from D.C. Montgomery, E.A. Peck, and G.G. Vining (2012). Introduction to Linear Regression Analysis. John Wiley & Sons. Minitab )
+
+```{r}
+
+Cement <- read.csv("C:/Users/Nick/Downloads/Cement (12).csv", header=FALSE)
+names(Cement)[1] <- "Heat.Evolved"
+names(Cement)[2] <- "X1"
+names(Cement)[3] <- "X2"
+names(Cement)[4] <- "X3"
+names(Cement)[5] <- "X4"
+
+#0.	What are the predictor variables and the response?
+
+paste("The predictor variables are X1, X2, X3, and X4, while the response is Heat.Evolved.")
+
+#1.	Construct a scatterplot matrix. Visually, do any of the predictor variables appear to have a strong linear relationship with the response.
+
+pairs(~ Heat.Evolved+X1+X2+X3+X4, data = Cement)
+
+paste("Heat.Evolved, does not appear to have a strong linear relationship with any of the predictors. However, X1, and X2, have a positive relationship with Heat.Evolved.")
+
+#2.	Compute the correlation matrix. Does this agree with your visual findings?
+
+cor(Cement)
+paste("The values in the correlation matrix do align with the scatterplot matrix, none of the predictors are strongly correlated with Heat.Evolved, but X1 and X2 do have a positive correlation.")
+
+#3.	What are the hypotheses for testing whether any of the predictors are useful for describing/explaining the response? Conduct the test. Indicate the F statistic, P-value, and conclusion. Indicate the hypotheses in terms of parameters and models.
+
+paste(" The hypotheses are: H_0: Beta_X1 = Beta_X2 = Beta_X3 = Beta_X4 = 0. Heat.Evolved = beta_0 + error. H_1: At least one beta value is not 0. Heat.Evolved = beta_0 + Beta_X1*X1 + Beta_X2*X2 + Beta_X3*X3 + Beta_X4*X4 +error. At least one of the betas do not equal 0.")
+
+fit.all <- lm(Heat.Evolved ~ X1 + X2 + X3 + X4, data=Cement)
+summary(fit.all)
+
+paste("Reject the null and accept the alternative, at least one of the beta values (X1-X4) is not zero. The F-statistic is 111.5 on 4 and 8 DF, the  p-value: 4.756e-07.")
+
+#4.	Determine which variable has the highest correlation with the response. Test whether it alone is useful for describing/explaining the response. Indicate the hypothesis for such a test and the full and reduced models being compared. Create a histogram of the residuals for the full model.
+
+fit.all <- lm(Heat.Evolved ~ X1 + X2 + X3 + X4, data=Cement)
+fit.reduced <- lm(Heat.Evolved ~ X1, data=Cement)
+anova(fit.all, fit.reduced)
+
+paste("H_0: Heat.Evolved = beta_0 + beta_X1*X1 +error. X1 is sufficient to determine Heat.Evolved. H_1: Heat.Evolved = beta_0 + Beta_X1*X1 + Beta_X2*X2 + Beta_X3*X3 + Beta_X4*X4 + error. More than just X1 is required to determine Heat.Evolved.")
+
+paste("Reject the null and accept the alternative, more than just X1 is required to get an accurate depiction of Heat.Evolved.")
+residuals <- fit.all$residuals
+hist(residuals)
+
+
+#5.	Determine the variables with the second and third strongest correlation with the response. Use the variable from the previous part to define a reduced model, determine if either of these two variables are useful in modeling the response? (Use a single test to answer this.)
+
+fit.all <- lm(Heat.Evolved ~ X1 + X2 + X4, data=Cement)
+fit.reduced <- lm(Heat.Evolved ~ X1, data=Cement)
+anova(fit.all, fit.reduced)
+
+paste("H_0: Heat.Evolved = beta_0 + beta_X1*X1 +error. X1 is sufficient to determine Heat.Evolved. H_1: Heat.Evolved = beta_0 + Beta_X1*X1 + Beta_X2*X2 +  Beta_X4*X4 + error. At least one of X2 and X4 is useful in determining Heat.Evolved.")
+
+paste("Reject the null and accept the alternative, At least one of X2 and X4 is useful in determining Heat.Evolved.")
+
+#6.	If either of the additional variables are significant, create a histogram and normal quantile plot, of the residuals using all three variables. Do the residuals display any pattern?
+
+residuals <- fit.all$residuals
+hist(residuals)
+qqnorm(residuals)
+
+paste("The results do appear to show a generally normal distribution of residuals on a linear regression model, however, there is a gap in residuals from 0 to -1")
+```
+0) The predictor variables are X1, X2, X3, and X4, while the response is Heat.Evolved.
+
+1) Heat.Evolved, does not appear to have a strong linear relationship with any of the predictors. However, X1, and X2, have a positive relationship with Heat.Evolved.
+
+2) The values in the correlation matrix do align with the scatterplot matrix, none of the predictors are strongly correlated with Heat.Evolved, but X1 and X2 do have a positive correlation.
+
+3) "The hypotheses are: H_0: Beta_X1 = Beta_X2 = Beta_X3 = Beta_X4 = 0. Heat.Evolved = beta_0 + error. H_1: At least one beta value is not 0. Heat.Evolved = beta_0 + Beta_X1*X1 + Beta_X2*X2 + Beta_X3*X3 + Beta_X4*X4 + error. At least one of the betas do not equal 0."
+
+Reject the null and accept the alternative, at least one of the beta values (X1-X4) is not zero. The F-statistic is 111.5 on 4 and 8 DF, the  p-value: 4.756e-07.
+
+4) "H_0: Heat.Evolved = beta_0 + beta_X1*X1 +error. X1 is sufficient to determine Heat.Evolved. H_1: Heat.Evolved = beta_0 + Beta_X1*X1 + Beta_X2*X2 + Beta_X3*X3 + Beta_X4*X4 + error. More than just X1 is required to determine Heat.Evolved."
+
+Reject the null and accept the alternative, more than just X1 is required to get an accurate depiction of Heat.Evolved.
+
+5) "H_0: Heat.Evolved = beta_0 + beta_X1*X1 +error. X1 is sufficient to determine Heat.Evolved. H_1: Heat.Evolved = beta_0 + Beta_X1*X1 + Beta_X2*X2 +  Beta_X4*X4 + error. At least one of X2 and X4 is useful in determining Heat.Evolved."
+
+Reject the null and accept the alternative, At least one of X2 and X4 is useful in determining Heat.Evolved.
+
+6) he results do appear to show a generally normal distribution of residuals on a linear regression model, however, there is a gap in residuals from 0 to -1
+
+\newpage
+
+
+Problem #3: Technicians measure heat flux as part of a solar thermal energy test. An energy engineer wants to determine how total heat flux is predicted by other variables: insolation, the position of the east, south, and north focal points, and the time of day. (Data are from D.C. Montgomery, E.A. Peck, and G.G. Vining (2012). Introduction to Linear Regression Analysis. John Wiley & Sons.) For these questions we will assume that all regression assumptions are met.
+
+```{r}
+
+Energy <- read.csv("C:/Users/Nick/Downloads/ThermalEnergy (1).csv")
+names(Energy)[1] <- "Flux"
+#a.	Construct a scatterplot matrix. Visually, do any of the predictor variables appear to have a linear relationship with the response. Do any of the variables appear to have a strong non-linear relationship with the response?
+
+pairs(~ Flux+Insolation+East+South+North+Time.of.Day, data = Energy)
+
+paste("Flux and insolation appear to have a strong linear relationship. Flux and North also appear to have a strong linear relationship. Flux and Time of Day appear to have a strong non-linear relationship.")
+
+#b.	Compute the correlation matrix. Does the results agree with your visual findings?
+
+cor(Energy)
+paste("Yes, the correlation values match the plot-based predictions.")
+
+#c.	Model the response on each individual predictor. Which model has the smallest SSE?
+
+lm.insolation <- lm(Flux ~ Insolation, data = Energy)
+a <- anova(lm.insolation)
+SSE.Insolation <- 8898.1
+
+lm.East <- lm(Flux ~ East, data = Energy)
+b <- anova(lm.East)
+SSE.East <- 14528.1
+
+lm.South <- lm(Flux~South, data = Energy)
+c <- anova(lm.South)
+SSE.South <- 14497.5
+
+lm.North <- lm(Flux~ North, data = Energy)
+d <- anova(lm.North)
+SSE.North <- 4103.2
+
+lm.Time <- lm(Flux~Time.of.Day, data=Energy)
+e <- anova(lm.Time)
+SSE.Time <- 12871.8
+
+paste("The model of Flux on North has the smallest SSE of 4103.2")
+
+#d.	Build on the model from the previous part. Determine the model, using two predictors, that produces the smallest SSE.( One of the variables should be the variable selected in the previous part.) Is this SSE larger or smaller than the previous?
+
+lm.insolation <- lm(Flux ~ North+Insolation, data = Energy)
+a <- anova(lm.insolation)
+SSE.Insolation <- 3907.4
+
+lm.East <- lm(Flux ~ North+East, data = Energy)
+b <- anova(lm.East)
+SSE.East <- 4103.1
+
+lm.South <- lm(Flux~ North+South, data = Energy)
+c <- anova(lm.South)
+SSE.South <- 2074.3
+
+lm.Time <- lm(Flux~North+Time.of.Day, data=Energy)
+e <- anova(lm.Time)
+SSE.Time <- 2639.7
+
+paste("The model of Flux on North and East produces the smallest SSE. This SSE is smaller than the previous.")
+
+#e.	Determine the mean of the observed values for both of these predictors. Estimate the mean total heat flux when the two predictors are set to their averages.
+
+meanNorth <- mean(Energy$North)
+meanSouth <- mean(Energy$South)
+
+summary <- summary(lm.South)
+
+Total.Flux <- summary$coefficients[1] + summary$coefficients[2]*meanNorth + summary$coefficients[3]*meanSouth
+Total.Flux
+paste("The mean total flux when the 2 predictors are set to their averages is 249.6379")
+```
+A) Flux and insolation appear to have a strong linear relationship. Flux and North also appear to have a strong linear relationship. Flux and Time of Day appear to have a strong non-linear relationship.
+
+B) Yes, the correlation values match the plot-based predictions.
+
+C) The model of Flux on North has the smallest SSE of 4103.2
+
+D) The model of Flux on North and East produces the smallest SSE. This SSE is smaller than the previous.
+
+E) The mean total flux when the 2 predictors are set to their averages is 249.6379
+
+\newpage
+
+Problem #4: A wine producer wants to know how the chemical composition of his wine relates to sensory evaluations. He has 37 Pinot Noir samples, each described by 17 elemental concentrations (Cd, Mo, Mn, Ni, Cu, Al, Ba, Cr, Sr, Pb, B, Mg, Si, Na, Ca, P, K) and a score on the wine’s aroma from a panel of judges. He wants to predict the aroma score from the 17 elements. Data are from: I.E. Frank and B.R. Kowalski (1984). “Prediction of Wine Quality and Geographic Origin from Chemical Measurements by Partial Least-Squares Regression Modeling,” Analytica Chimica Acta, 162, 241 − 251. (Minitab)
+
+```{r}
+
+Wine <- read.csv("C:/Users/Nick/Downloads/Wine (1).csv")
+names(Wine)[1] <- "Cd"
+
+#a.	Create a scatterplot matrix. Where would you look in this scatterplot matrix, if you wanted to judge the relationship between the response and the individual predictors. (Keeping the response on the response on the vertical axis.) Do you see any particularily string linear relationships with the predictor? Do you see any type of problems using a scatterplot matrix similar to this one?
+
+pairs(~ Cd+Mo+Mn+Ni+Cu+Al+Ba+Cr+Sr+Pb+B+Mg+Si+Na+Ca+P+K+Aroma, data = Wine)
+
+paste("The relationship between the response and the predictors would be in the row and column associated with the response variable. In this case, the aroma variable is in the bottom right, so the relationships would be along the bottom row and the righmost column. Since there are so many predictor variables in this dataset, it is difficult to determine if there are any strong relationships on the r interface. The scatterplots are too small. This is the problem using this type of scatterplot matrix.")
+
+#b.	Create the correlation matrix. Do the values here agree with what you see?
+
+cor(Wine)
+
+paste("Since I cannot see the matrix in part A, I do not have a scatterplot to compare the correlation values to")
+
+
+#c.	Assuming our model assumptions are met, test whether any of these predictors are useful in describing the aroma score? Report the hypotheses, the full and the reduced model, the F-statistic, P-value and conclusion. (Recall: If you want to model based upon all of the variables in a dataframe, the formula can be written: response~. )
+
+fit.all <- lm(Aroma~. , data=Wine)
+summary(fit.all)
+
+paste("H_0: All of the beta values for the predictors equal 0, The predictors have no significant effect on Aroma. H_1: At least one of the beta values is not 0. At least one of the predictor values has a significant effect on Aroma.
+      
+      Reject the null and accept the alternative, at least one of the beta values is not 0. At least one of the predictor values is useful in determining Aroma. The F-Statistic is 5.829 on 17 and 19 DF, the p-value: 0.0002004.")
+
+
+#d.	Identify the variable with the highest p-value in the individual tests. Model your response on all predictors except the variable you identified. (Hint: The formula for using all but one variable looks like this : response ~ . - droppedVariable )
+
+paste("The variable with the highest P-value is P.")
+fit.all <- lm(Aroma~. - P, data=Wine)
+summary(fit.all)
+
+
+#e.	Based on the results from the previous part, identify the variable with the highest p-value in the individual tests listed in the summary. Model your response on all predictors except the two variables identified so far. (Hint: The formula for using all but two variables looks like this : response ~ . - droppedVariable1 - droppedVariable2 )
+
+paste("the variable with the next highest P-Value is Mg")
+
+fit.all <- lm(Aroma~. - P - Mg, data=Wine)
+summary(fit.all)
+
+#f.	Based on the results from the previous part, identify the variable with the highest p-value in the individual tests. Model your response on all predictors except the three variables identified so far.
+
+
+paste("the variable with the next highest P-Value is Ni")
+
+fit.all <- lm(Aroma~. - P - Mg - Ni, data=Wine)
+summary(fit.all)
+```
+
+A) The relationship between the response and the predictors would be in the row and column associated with the response variable. In this case, the aroma variable is in the bottom right, so the relationships would be along the bottom row and the righmost column. Since there are so many predictor variables in this dataset, it is difficult to determine if there are any strong relationships on the r interface. The scatterplots are too small. This is the problem using this type of scatterplot matrix.
+
+B) Since I cannot see the matrix in part A, I do not have a scatterplot to compare the correlation values to.
+
+C) H_0: All of the beta values for the predictors equal 0, The predictors have no significant effect on Aroma. H_1: At least one of the beta values is not 0. At least one of the predictor values has a significant effect on Aroma.
+      
+Reject the null and accept the alternative, at least one of the beta values is not 0. At least one of the predictor values is useful in determining Aroma. The F-Statistic is 5.829 on 17 and 19 DF, the p-value: 0.0002004.
+
+D) The variable with the highest P-value is P.
+
+E) the variable with the next highest P-Value is Mg.
+
+F) the variable with the next highest P-Value is Ni.
+
+
+

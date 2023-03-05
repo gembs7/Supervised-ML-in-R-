@@ -1,0 +1,258 @@
+---
+title: "stsci4110hw6"
+author: "Nick Gembs"
+date: "11/29/2022"
+output:
+  word_document: default
+  html_document: default
+---
+
+
+b.
+
+𝐻0: 𝜋12 = 𝜋21 ≡ 𝐻0: 𝜋+1 = 𝜋1+
+𝐻𝐴: 𝜋12 ≠ 𝜋21 ≡ 𝐻0: 𝜋+1 ≠ 𝜋1+
+```{r}
+M = (33-37)^2/(33+37)
+1-pchisq(M,1,lower.tail = T)
+
+```
+p-value > .05, fail to reject the null.
+
+Conclude: Table margins are homogeneous. 𝜋12 = 𝜋21 ≡ 𝐻0: 𝜋+1 = 𝜋1+
+The probability of Bryant making the second free throw does not change based on the outcome of the first free throw
+
+
+c.
+```{r}
+library(PropCIs)
+diffpropci.mp(33, 37, 230, conf.level = 0.95) 
+```
+0 is included in the 95% CI.Therefore, there is not enough evidence to prove non-homogeneity.
+
+
+2.
+
+```{r}
+df = read.csv("C:/Users/Nick/Downloads/afterlife2.csv")
+```
+
+
+```{r}
+sample(df)
+```
+
+
+```{r}
+df$belief = factor(df$belief, ordered = F)
+df$race = factor(df$race, ordered = F)
+df$gender = factor(df$gender, ordered = F)
+df$belief = relevel(df$belief, ref = "No")
+```
+
+```{r}
+library(tidyr)
+
+df = uncount(df, count, .remove = TRUE, .id = NULL)
+```
+
+a.
+```{r}
+library(nnet)
+bcl = multinom(belief ~ race+gender+religiosity, data = df)
+summary(bcl)
+```
+
+b.
+```{r}
+# Undecided =  -0.6942144 + 0.1944430*raceWhite + -0.1445318*genderMale + 0.06299078*religiosity
+
+# Yes = -1.0998846 + 0.3690174*raceWhite + -0.4902732*genderMale + 0.89822127*religiosity
+```
+
+c.
+```{r}
+
+#  odds of “yes” versus “no” for the two genders
+
+odds = exp(-0.4902732)
+odds
+cat("being male has a 0.612459 multiplicative effect on odds of being 'yes' belief over 'no'\n")
+
+#  odds of “yes” versus “no” for the two races
+
+odds = exp(0.3690174)
+odds
+cat("being white has a 1.446313 multiplicative effect on odds of being 'yes' belief over 'no'\n")
+
+# change in odds of “yes” versus “no” for a one unit increase in religiosity
+
+odds = exp(0.89822127)
+odds
+cat("A one unit increase in religiosity has a 2.455232 multiplicative effect on odds of being 'yes' belief over 'no'\n")
+```
+
+d.
+```{r}
+library(lmtest)
+
+
+#HO : gender is not significant in predicting belief
+#H1 : gender is significant in predicting belief
+bclg = multinom(belief ~ race+religiosity, data = df)
+lrtest(bcl,bclg)
+
+# p-value<.05, reject null
+```
+
+e.
+```{r}
+#HO : race is not significant in predicting belief
+#H1 : race is significant in predicting belief
+bclrace = multinom(belief ~ gender+religiosity, data = df)
+lrtest(bcl,bclrace)
+
+# p-value>.05, fail to reject null
+```
+
+
+f.
+```{r}
+#HO : religiosity is not significant in predicting belief
+#H1 : religiosity is significant in predicting belief
+bclr = multinom(belief ~ race+gender, data = df)
+lrtest(bcl,bclr)
+
+# p-value<.05, reject null
+```
+
+
+g.
+```{r}
+bclrace = multinom(belief ~ gender+religiosity, data = df)
+summary(bclrace)
+
+# Undecided =   -0.5578253 -0.1295137*genderMale  + 0.06309689*religiosity
+# Yes =        -0.8341452 -0.4617498*genderMale  + 0.89802444* religiosity
+```
+
+h.
+```{r}
+
+newdf = data.frame(df$religiosity, fitted(bclrace), df$gender)
+
+plot(newdf$df.religiosity[newdf$df.gender=="Male"], newdf$Yes[newdf$df.gender=="Male"], type = "p", col="blue", xlab = "religiosity", ylab = "Probability", xlim = c(1,5), ylim = c(0,1), main = "Males")
+
+legend("topleft", lty = c(1,1,1), pch = c(-1,-1,-1), col = c("blue", "green", "red"), legend = c("Yes","Undecided", "No"))
+
+points(newdf$df.religiosity[newdf$df.gender=="Male"], newdf$Undecided[newdf$df.gender=="Male"], col="green")
+
+points(newdf$df.religiosity[newdf$df.gender=="Male"], newdf$No[newdf$df.gender=="Male"], col="red")
+```
+
+
+
+```{r}
+plot(newdf$df.religiosity[newdf$df.gender=="Female"], newdf$Yes[newdf$df.gender=="Female"], type = "p", col="blue", xlab = "religiosity", ylab = "Probability", xlim = c(1,5), ylim = c(0,1), main = "Females")
+
+legend("topleft", lty = c(1,1,1), pch = c(-1,-1,-1), col = c("blue", "green", "red"), legend = c("Yes","Undecided", "No"))
+
+points(newdf$df.religiosity[newdf$df.gender=="Female"], newdf$Undecided[newdf$df.gender=="Female"], col="green")
+
+points(newdf$df.religiosity[newdf$df.gender=="Female"], newdf$No[newdf$df.gender=="Female"], col="red")
+```
+Non reiligious males are less likely to believe than non religious females. At levels of high religiosity, both males and females are very likely to believe.
+
+
+i.
+```{r}
+#sample(newdf[newdf$df.religiosity == 3,])
+```
+
+
+4.
+a.
+```{r}
+Northeast = c(266,10,8,7)
+Midwest = c(15,414,22,6)
+South = c(61,50,578,27)
+West = c(28,40,22,301)
+
+df = data.frame(Northeast,Midwest,South,West, row.names = c("Northeast", "Midwest", "South", "West"))
+
+mat = data.matrix(df)
+mat
+
+sixteen = c()
+for (i in 1:4){
+    sixteen[i] = (sum(mat[i,]))/(sum(mat))
+}
+
+twentyten = c()
+for (i in 1:4){
+    twentyten[i] = (sum(mat[,i]))/(sum(mat))
+}
+
+sixteen
+twentyten
+```
+
+b.
+```{r}
+#0: 𝜋𝑖+ = 𝜋+𝑖
+#for all 𝑖 = 1, … ,4.
+#𝐻𝐴: For at least one pair, 𝜋𝑖+ ≠ 𝜋+𝑖
+
+library(coin)
+library(mvtnorm)
+library(modeltools)
+
+
+
+mh_test(as.table(mat))
+
+# p - value is less than .05, reject the null. The marginal probabilities are not all the same. That is, region
+# preferences have shifted from age 16 to 2010.
+```
+
+
+5.
+
+a.
+```{r}
+
+ten2 = read.csv("C:/Users/Nick/Downloads/tennis-18-20v2.csv")
+
+```
+
+```{r}
+library(BradleyTerry2)
+tennisModel <- BTm(outcome = cbind(win1,win2), as.factor(first.player), as.factor(second.player),
+formula = ~ player, id = "player", data=ten2, refcat = "Kenin")
+tennisModel
+
+cat("\nPlayers ranked:\n 1. Halep - 1.2245\n 2. Williams - .9643\n 3. Osaka - .6105\n 4. Barty - .3771\n 5. Kenin - 0(ref)")
+```
+b.
+```{r}
+# P(Halep beats Barty)
+
+p = (exp(1.2245-.3771))/(1+exp(1.2245-.3771))
+p
+
+cat("There is a 70% chance that Halep beats Barty")
+```
+
+
+c.
+```{r}
+# P(Kenin beats Williams)
+
+p = (exp(0-.9643))/(1+exp(0-.9643))
+p
+
+cat("There is a 27.6% chance that Kenin beats Williams")
+```
+
+
+

@@ -1,0 +1,71 @@
+---
+title: "Lab 5"
+author: "Nick Gembs"
+date: "2/24/2023"
+output:
+  pdf_document: default
+  html_document: default
+---
+```{r}
+
+
+## part 1:
+
+hot <- read.csv("C:/Users/Nick/Downloads/Hot_100.csv")
+
+get_unique_songs <- function( dat ){
+  return( unique( dat$song_id ) )
+}
+
+weeks_on_chart <- function( dat ){
+  unique_songs <- get_unique_songs( dat )
+  weeks_on_chart <- rep( NA, length(unique_songs) )
+  for(j in 1:length( unique_songs ) ){
+    ii <- which( dat$song_id == unique_songs[j] )
+    weeks_on_chart[j] <- max( dat$time_on_chart[ii] )
+  }
+  ord <- order( weeks_on_chart, decreasing = TRUE )
+  return( data.frame( song = unique_songs[ord], weeks_on_chart = weeks_on_chart[ord] ) )
+}
+
+weeks_in_top10 <- function( dat ){
+  unique_songs <- get_unique_songs( dat )
+  weeks_in_top10 <- rep( NA, length( unique_songs ) )
+  for(j in 1:length( unique_songs ) ){
+    ii <- which( dat$song_id == unique_songs[j] )
+    weeks_in_top10[j] <- sum( dat$chart_position[ii] <= 10 )
+  }
+  ord <- order( weeks_in_top10, decreasing = TRUE )
+  return( data.frame( song = unique_songs[ord], weeks_in_top10 = weeks_in_top10[ord] ) )
+}
+
+weeks_at_num1 <- function( dat ){
+  unique_songs <- get_unique_songs( dat )
+  weeks_at_num1 <- rep( NA, length( unique_songs ) )
+  for(j in 1:length( unique_songs ) ){
+    ii <- which( dat$song_id == unique_songs[j] )
+    weeks_at_num1[j] <- sum( dat$chart_position[ii] <= 1 )
+  }
+  ord <- order( weeks_at_num1, decreasing = TRUE )
+  return( data.frame( song = unique_songs[ord], weeks_at_num1 = weeks_at_num1[ord] ) )
+}
+
+rank_songs <- function( dat, stat = "weeks on chart" ){
+  if( stat == "weeks on chart"  ){
+    rank_db <- weeks_on_chart( dat )
+  }
+  else if( stat == "weeks in top 10" ){
+    rank_db <- weeks_in_top10( dat )
+  }
+  else if( stat == "weeks at num 1"  ){
+    rank_db <- weeks_at_num1( dat  )
+  }
+  else { stop("unrecognize statistic") }
+  return( rank_db )
+}
+
+
+r <- rank_songs( hot, "weeks on chart" )
+head(r)
+```
+

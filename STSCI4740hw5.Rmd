@@ -1,0 +1,502 @@
+---
+title: "stsci4740hw5"
+author: "Nick Gembs"
+date: "11/26/2022"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r}
+p = 50
+N = 100
+set.seed(1)
+X_train = array(rnorm(p*N),c(N,p))
+eps_train = rnorm(N)
+Nte = 10^3
+X_te = array(rnorm(p*Nte),c(Nte,p))
+eps_te = rnorm(Nte)
+grid = 10^seq(10,-2,length = 100)
+
+```
+
+
+1.
+
+# Ridge
+```{r}
+df = as.data.frame(X_train)
+#sample(df)
+
+Y_train = 2*df$V1 + 2 * df$V2 + 2*df$V3 +2*df$V4 + 2*df$V5 + eps_train
+
+
+library(glmnet)
+
+#perform k-fold cross-validation to find optimal lambda value
+cv_model <- cv.glmnet(X_train, Y_train, alpha = 0, K=10)
+
+#find optimal lambda value that minimizes test MSE
+best_lambda <- cv_model$lambda.min
+best_lambda
+
+
+
+min(cv_model$cvm)
+```
+```{r}
+df = as.data.frame(X_te)
+#sample(df)
+
+Y_test = 2*df$V1 + 2 * df$V2 + 2*df$V3 +2*df$V4 + 2*df$V5 + eps_train
+
+Y_pred = predict(cv_model, newx = X_te, s = best_lambda )
+MSE_ridge = mean((Y_test-Y_pred)^2)
+MSE_ridge
+```
+
+# Lasso
+```{r}
+df = as.data.frame(X_train)
+#sample(df)
+
+Y_train = 2*df$V1 + 2 * df$V2 + 2*df$V3 +2*df$V4 + 2*df$V5 + eps_train
+
+
+library(glmnet)
+
+#perform k-fold cross-validation to find optimal lambda value
+cv_model <- cv.glmnet(X_train, Y_train, alpha = 1, K=10)
+
+#find optimal lambda value that minimizes test MSE
+best_lambda <- cv_model$lambda.min
+best_lambda
+
+
+
+min(cv_model$cvm)
+```
+
+```{r}
+df = as.data.frame(X_te)
+#sample(df)
+
+Y_test = 2*df$V1 + 2 * df$V2 + 2*df$V3 +2*df$V4 + 2*df$V5 + eps_train
+
+Y_pred = predict(cv_model, newx = X_te, s = best_lambda )
+MSE_lasso = mean((Y_test-Y_pred)^2)
+MSE_lasso
+
+```
+# Test MSE for Lasso is less than ridge in a sparse model
+
+
+2
+
+# Ridge
+```{r}
+df = as.data.frame(X_train)
+#sample(df)
+
+Y_train =  eps_train
+
+for (i in df) {
+  Y_train = Y_train + .5*i
+}
+
+library(glmnet)
+
+#perform k-fold cross-validation to find optimal lambda value
+cv_model <- cv.glmnet(X_train, Y_train, alpha = 0, K=10)
+
+#find optimal lambda value that minimizes test MSE
+best_lambda <- cv_model$lambda.min
+best_lambda
+
+
+
+min(cv_model$cvm)
+```
+```{r}
+df = as.data.frame(X_te)
+#sample(df)
+
+Y_test = eps_te
+
+for (i in df) {
+  Y_test= Y_test + .5*i
+}
+
+Y_pred = predict(cv_model, newx = X_te, s = best_lambda )
+MSE_ridge = mean((Y_test-Y_pred)^2)
+MSE_ridge
+```
+
+# Lasso
+```{r}
+df = as.data.frame(X_train)
+#sample(df)
+
+Y_train =  eps_train
+
+for (i in df) {
+  Y_train = Y_train + .5*i
+}
+
+library(glmnet)
+
+#perform k-fold cross-validation to find optimal lambda value
+cv_model <- cv.glmnet(X_train, Y_train, alpha = 1, K=10)
+
+#find optimal lambda value that minimizes test MSE
+best_lambda <- cv_model$lambda.min
+best_lambda
+
+
+
+min(cv_model$cvm)
+```
+
+
+```{r}
+df = as.data.frame(X_te)
+#sample(df)
+
+Y_test = eps_te
+
+for (i in df) {
+  Y_test= Y_test + .5*i
+}
+
+Y_pred = predict(cv_model, newx = X_te, s = best_lambda )
+MSE_lasso = mean((Y_test-Y_pred)^2)
+MSE_lasso
+```
+# For non-sparse models, ridge has a lower test MSE than lasso.
+
+
+
+3.
+
+```{r}
+test_errors_ridge = rep(0,50)
+
+for ( i in 1:50){
+  set.seed(i)
+  X_train = array(rnorm(p*N),c(N,p))
+eps_train = rnorm(N)
+Nte = 10^3
+X_te = array(rnorm(p*Nte),c(Nte,p))
+eps_te = rnorm(Nte)
+grid = 10^seq(10,-2,length = 100)
+
+df = as.data.frame(X_train)
+#sample(df)
+
+Y_train = 2*df$V1 + 2 * df$V2 + 2*df$V3 +2*df$V4 + 2*df$V5 + eps_train
+
+
+#perform k-fold cross-validation to find optimal lambda value
+cv_model <- cv.glmnet(X_train, Y_train, alpha = 0, K=10)
+
+#find optimal lambda value that minimizes test MSE
+best_lambda <- cv_model$lambda.min
+
+df = as.data.frame(X_te)
+#sample(df)
+
+Y_test = 2*df$V1 + 2 * df$V2 + 2*df$V3 +2*df$V4 + 2*df$V5 + eps_train
+
+Y_pred = predict(cv_model, newx = X_te, s = best_lambda )
+MSE_ridge = mean((Y_test-Y_pred)^2)
+
+test_errors_ridge[i] = MSE_ridge
+
+}
+
+test_errors_lasso = rep(0,50)
+
+for ( i in 1:50){
+  set.seed(i)
+  X_train = array(rnorm(p*N),c(N,p))
+eps_train = rnorm(N)
+Nte = 10^3
+X_te = array(rnorm(p*Nte),c(Nte,p))
+eps_te = rnorm(Nte)
+grid = 10^seq(10,-2,length = 100)
+
+df = as.data.frame(X_train)
+#sample(df)
+
+Y_train = 2*df$V1 + 2 * df$V2 + 2*df$V3 +2*df$V4 + 2*df$V5 + eps_train
+
+
+#perform k-fold cross-validation to find optimal lambda value
+cv_model <- cv.glmnet(X_train, Y_train, alpha = 1, K=10)
+
+#find optimal lambda value that minimizes test MSE
+best_lambda <- cv_model$lambda.min
+
+df = as.data.frame(X_te)
+#sample(df)
+
+Y_test = 2*df$V1 + 2 * df$V2 + 2*df$V3 +2*df$V4 + 2*df$V5 + eps_train
+
+Y_pred = predict(cv_model, newx = X_te, s = best_lambda )
+MSE_lasso = mean((Y_test-Y_pred)^2)
+
+test_errors_lasso[i] = MSE_lasso
+
+}
+  
+
+
+```
+
+
+
+```{r}
+boxplot(test_errors_lasso, main = "Lasso Test Error Sparse Model")
+
+boxplot(test_errors_ridge, main = "Ridge Test Error Sparse Model")
+```
+# Lasso Test MSE is lower on average for the sparse model
+
+
+
+
+4.
+
+```{r}
+test_errors_ridge = rep(0,50)
+
+for ( i in 1:50){
+  set.seed(i)
+  X_train = array(rnorm(p*N),c(N,p))
+eps_train = rnorm(N)
+Nte = 10^3
+X_te = array(rnorm(p*Nte),c(Nte,p))
+eps_te = rnorm(Nte)
+grid = 10^seq(10,-2,length = 100)
+
+df = as.data.frame(X_train)
+#sample(df)
+
+Y_train =  eps_train
+
+for (q in df) {
+  Y_train = Y_train + .5*q
+}
+
+
+#perform k-fold cross-validation to find optimal lambda value
+cv_model <- cv.glmnet(X_train, Y_train, alpha = 0, K=10)
+
+#find optimal lambda value that minimizes test MSE
+best_lambda <- cv_model$lambda.min
+
+df = as.data.frame(X_te)
+#sample(df)
+
+Y_test  =  eps_train
+
+for (q in df) {
+  Y_train = Y_train + .5*q
+}
+
+Y_pred = predict(cv_model, newx = X_te, s = best_lambda )
+MSE_ridge = mean((Y_test-Y_pred)^2)
+
+test_errors_ridge[i] = MSE_ridge
+
+}
+
+test_errors_lasso = rep(0,50)
+
+for ( i in 1:50){
+  set.seed(i)
+  X_train = array(rnorm(p*N),c(N,p))
+eps_train = rnorm(N)
+Nte = 10^3
+X_te = array(rnorm(p*Nte),c(Nte,p))
+eps_te = rnorm(Nte)
+grid = 10^seq(10,-2,length = 100)
+
+df = as.data.frame(X_train)
+#sample(df)
+
+Y_train  =  eps_train
+
+for (q in df) {
+  Y_train = Y_train + .5*q
+}
+
+
+#perform k-fold cross-validation to find optimal lambda value
+cv_model <- cv.glmnet(X_train, Y_train, alpha = 1, K=10)
+
+#find optimal lambda value that minimizes test MSE
+best_lambda <- cv_model$lambda.min
+
+df = as.data.frame(X_te)
+#sample(df)
+
+Y_test  =  eps_train
+
+for (q in df) {
+  Y_train = Y_train + .5*q
+}
+
+Y_pred = predict(cv_model, newx = X_te, s = best_lambda )
+MSE_lasso = mean((Y_test-Y_pred)^2)
+
+test_errors_lasso[i] = MSE_lasso
+
+}
+  
+
+
+```
+
+
+
+```{r}
+boxplot(test_errors_lasso, main = "Lasso Test Error Non-Sparse Model")
+
+boxplot(test_errors_ridge, main = "Ridge Test Error Non-Sparse Model")
+```
+# Ridge Test MSE is lower on average for the non-sparse model
+
+
+
+
+
+2. (Problem 8)
+```{r}
+library(tree)
+library(ISLR)
+
+data = Carseats
+```
+
+
+
+```{r}
+# a
+
+set.seed(12)
+
+train = sample(length(data$Sales), length(data$Sales)/2)
+
+training = data[train,]
+testing = data[-train,]
+```
+
+
+```{r}
+# b
+
+tree <- tree(Sales ~ ., data = training)
+plot(tree)
+text(tree, cex = .56)
+```
+```{r}
+treepred <- predict(tree, newdata = testing)
+MSE = mean((treepred - testing$Sales)^2)
+MSE
+```
+MSE is 5.08059
+
+
+```{r}
+# c
+
+cv <- cv.tree(tree)
+plot(cv$size, cv$dev)
+```
+
+```{r}
+# min dev appears at size 9
+
+prunedtree <- prune.tree(tree, best = 9)
+prunetreepred <- predict(prunedtree, newdata = testing)
+MSE = mean((prunetreepred - testing$Sales)^2)
+MSE
+
+```
+The pruned tree had a greater test MSE (5.184776) than the unpruned tree (5.08059). This indicates that the unpruned tree was not overfitting to the training data.
+
+
+```{r}
+# d
+
+library(randomForest)
+
+bagging <- randomForest(Sales ~ ., data = Carseats, subset = train,
+                        importance = TRUE)
+bagging
+
+
+predictbagging <- predict(bagging, newdata = testing)
+MSE = mean((predictbagging - testing$Sales)^2)
+
+MSE
+```
+MSE of bagging is 3.044373, lower than the two trees
+
+```{r}
+importance(bagging)
+varImpPlot(bagging)
+
+```
+Shelf location and price are the most important variables according to bagging.
+
+```{r}
+# e
+
+MSE_forest = rep(0,10)
+
+for (i in 1:10){
+  randomf <- randomForest(Sales ~ ., data = Carseats, subset = train, mtry = i,
+                        importance = TRUE)
+  randomf.pred <- predict(randomf, newdata = testing)
+  MSE_forest[i] = mean((randomf.pred - testing$Sales)^2)
+}
+
+mtry = 1:10
+
+plot(mtry,MSE_forest)
+```
+```{r}
+MSE_forest
+```
+The value of m with the minimum test MSE is m=7 with an MSE of 2.833899, lower than any other model MSE tried so far
+
+```{r}
+
+randomf <- randomForest(Sales ~ ., data = Carseats, subset = train, mtry = 7,
+                        importance = TRUE)
+importance(randomf)
+varImpPlot(randomf)
+```
+Random forest also claims that shelf location, followed by price are the most important variables
+
+
+```{r}
+# f
+
+library(BayesTree)
+
+x = subset(training, select = -Sales )
+y = training$Sales
+
+bart = bart(x,y)
+
+MSE = mean((bart$y-testing$Sales)^2)
+MSE
+```
+BART MSE is highest MSE tested
+
+
+
+

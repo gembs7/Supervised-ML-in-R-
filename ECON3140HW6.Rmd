@@ -1,0 +1,67 @@
+---
+title: "ECON3140HW6"
+author: "Nick Gembs"
+date: "4/21/2022"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r}
+library(haven)
+
+data <- read_dta("C:/Users/Nick/Downloads/JEC.dta")
+
+# 3.1
+# This model is created to estimate the overall elasticity of demand in the market. Elasticity is represented in the form of percent change, and since this model is likely skewed and not entirely linear, a log-log model would best respresent this model by regressing a percent change in y (Qi) on a percent change in x (Pi). ICE is included because it will clearly have an effect on quantity shipped, as icy roads will lower quntity. However, this regressor is not logged because it is binary.
+```
+
+```{r}
+
+# 3.2
+
+lm.fit <- lm(data$quantity ~ log(data$price) + data$ice + data$seas1 + data$seas2 + data$seas3 + data$seas4 + data$seas5 + data$seas6 + data$seas7 + data$seas8 + data$seas9 + data$seas10 + data$seas11 + data$seas12)
+
+summary(lm.fit)
+
+```
+```{r}
+
+# 3.3
+
+# This estimate is not entirely credible because some of the covariates may be correlated with the error term. log(price) likely has a nonzero corrleation with other regressors and the error term as many factors effect price, including the navigatibility of the Great Lakes and the season. Cartel would be a plausible IV as it is not correlated with the other terms.
+```
+
+
+```{r}
+
+# 3.4
+
+firststage = lm(log(data$price) ~ data$cartel)
+summary(firststage)
+
+firststage = lm((data$ice) ~ data$cartel)
+summary(firststage)
+
+# Based on the P values and F statistics, cartel appears to be a weak instrumental variable for ice, however a strong instrumental variable for price. Cartel could instead be an instrumental variable for price as price will likely go up if the great lakes are not navigable. Price is also likely correlated with the error term as many factors effect the price. Carteli is not correlated witht the other covariates like price is.
+
+```
+```{r}
+
+# 3.5
+
+second = lm( data$quantity ~ firststage$fitted.values + data$ice + data$seas1 + data$seas2 + data$seas3 + data$seas4 + data$seas5 + data$seas6 + data$seas7 + data$seas8 + data$seas9 + data$seas10 + data$seas11 + data$seas12 )
+summary(second)
+
+EstimatedElasticity = second$coefficients[2]
+EstimatedElasticity
+# Price Elasticity of Demand is very negative, suggesting a heavily elastic demand
+```
+```{r}
+
+# 3.6
+
+# This IV regression shows that the elasticity of demand is significantly less than negative 1, suggesting heavy elasticity. This means that the firm is not operating at a profit maximizing price.
+
+```
+
